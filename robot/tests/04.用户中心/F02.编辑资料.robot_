@@ -1,0 +1,61 @@
+*** Settings ***
+Documentation       shanghairanking.cn - 用户登录功能
+...
+Resource         ../../resources/CommonFunctionality.robot
+
+Suite Setup  准备开始测试用户登录后可操作之功能
+Suite Teardown  完成测试用户登出系统
+
+*** Variables ***
+
+*** Test Cases ***
+编辑资料
+    [Documentation]     用户编辑昵称、邮箱、上传头像、更新身份
+    [Tags]     Functional   用户中心 
+
+    # 进入编辑资料页面
+    # 点出菜单
+    Click Element  css=div.header-user > div.user-detail > span
+    # 点击 - 编辑资料
+    Click Element  css=div.user-dropdown > ul > li:nth-child(1)
+    Sleep  2s
+    # 验证页面元素
+    # Wait Until Element Contains  css=div.avatar-cover  修改头像
+    FOR  ${i}  IN RANGE    1   10
+        # Log To Console  ${i}
+        Press Keys  css=#nickNameEdit  \ue003
+    END
+
+    Sleep  10ms
+
+    input text  css=#nickNameEdit  哥斯拉002
+
+    FOR  ${ii}  IN RANGE    1   20
+        # Log To Console  ${ii}
+        Press Keys  css=#emailEdit  \ue003
+    END
+
+    input text  css=#emailEdit  subsky002@gmail.com
+
+    Click Element  css=img.ant-cascader-picker-arrow
+
+    Sleep  1s
+    # 点击 学生
+    Click Element  css=div.ant-cascader-menus-content > ul.ant-cascader-menu:nth-child(1) > li
+    Sleep  1s
+    # 点击 高中生
+    Click Element  css=div.ant-cascader-menus-content > ul.ant-cascader-menu:nth-child(2) > li
+    Sleep  3s
+
+
+    sleep  10ms
+    Click Element  css=#saveBtn
+    Wait Until Element COntains  css=div.ant-message  修改用户信息成功
+
+    Log To Console     \n\r----------> 用户信息保存成功\n\r
+    # 检查「Edit中的昵称」是否和「用户菜单上的昵称」一致
+    ${nick_name}    Get Text    css=#nickNameEdit
+    Element Should Contain  css=div.user-detail     ${nick_name}
+
+    # 修改「您的身份」
+#    Click Element       css=#userRoleEdit

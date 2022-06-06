@@ -1,0 +1,78 @@
+#
+
+WITH table_1 AS ( SELECT indicatorid, indicatorname, RIGHT(data_year_1, 4) new_year
+                  FROM `indicator_world`
+                  WHERE indicatorid IN ('39',
+                                        '40',
+                                        '41',
+                                        '42',
+                                        '43',
+                                        '44',
+                                        '45',
+                                        '46',
+                                        '47',
+                                        '51',
+                                        '52',
+                                        '53',
+                                        '54',
+                                        '55',
+                                        '56',
+                                        '57',
+                                        '58',
+                                        '59',
+                                        '60',
+                                        '61',
+                                        '62',
+                                        '70',
+                                        '71',
+                                        '86',
+                                        '87',
+                                        '91',
+                                        '92',
+                                        '93',
+                                        '94',
+                                        '95',
+                                        '96',
+                                        '98',
+                                        '99'
+                      ) )
+SELECT A.indicatorCode, B.new_year, COUNT(DISTINCT institutionCode)
+FROM `data_detail_rank_list_world` A
+     LEFT JOIN table_1             B ON A.indicatorCode = B.indicatorid AND A.data_year = B.new_year
+WHERE A.institutionCode IN ( SELECT school_code FROM institution_world WHERE country = '美国' )
+  AND B.new_year IS NOT NULL
+  AND A.indicatorCode IN ('39',
+                          '40',
+                          '41',
+                          '42',
+                          '43',
+                          '44',
+                          '45',
+                          '46',
+                          '47',
+                          '51',
+                          '52',
+                          '53',
+                          '54',
+                          '55',
+                          '56',
+                          '57',
+                          '58',
+                          '59',
+                          '60',
+                          '61',
+                          '62',
+                          '70',
+                          '71',
+                          '86',
+                          '87',
+                          '91',
+                          '92',
+                          '93',
+                          '94',
+                          '95',
+                          '96',
+                          '98',
+                          '99'
+    )
+GROUP BY A.indicatorCode, A.data_year;
