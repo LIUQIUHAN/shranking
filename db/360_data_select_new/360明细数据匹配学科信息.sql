@@ -52,10 +52,12 @@ SELECT * FROM var_map_ub_spm WHERE var_code_spm = '' and remark is null;
 -- 中文期刊论文（总数）	                 i47
 
 # 更新360明细中已经有学科信息的变量
-UPDATE var_detail SET subject_code = detail ->> '$.subject_code'
-WHERE var_code IN ('subt','moerank','bcsr');
+UPDATE var_detail
+SET subject_code = detail ->> '$.subject_code'
+WHERE var_code IN ('subt', 'moerank', 'bcsr')
+  AND _eversions_ IN (202204, 202205, 202206);
 
-# 补充关联表中的match_field_ub、match_field_spm
+# 补充关联表中的match_field_ub/match_field_spm
 
 
 # 更新360明细表中的学科信息

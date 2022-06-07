@@ -1,5 +1,5 @@
 #  高校状态指标数据库 国际对比页面 明细数据系迁移 (耗时：3分钟)
-USE ub_ranking_0520;
+USE ub_ranking_dev;
 
 -- 1.明细表 ub_ranking_old.data_detail_rank_list_detail_world 指标代码替换
 
@@ -516,7 +516,6 @@ WHERE ind_code IN ('34_0', '34_1', '34_2', '34_3', '34_4', '34_5');
 UPDATE derived_ind_value_latest A
 SET derived_ind_id = ( SELECT id FROM derived_indicator B WHERE A.ind_code = B.code AND B.r_leaf_id = 5 )
 WHERE 1;
-
 
 
 

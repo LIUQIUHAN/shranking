@@ -192,13 +192,41 @@ WHERE A.yr = 2022;*/
 
 
 
+# 国际大学排名
+INSERT INTO univ(/*id,*/ code, name_cn, name_en, /*logo,*/ up, country_id,/* region, found_year, address, website, intro, programs, key_stats,*/
+                         outdated, remark/*, updated_at*/)
+SELECT 'RI03579',
+       '印度国立技术学院',
+       'National Institute of Technology Silchar',
+       func_calc_univ_up('National Institute of Technology Silchar', 'yinduguolijishuxueyuan'),
+       87,
+       0,
+       '2022.06.07处理THE亚洲大学排名数据时添加';
 
 
+# 更新学校univ_id:
+UPDATE ub_details_raw.univ_rankings_int A
+SET A.univ_id = (
+    SELECT B.id
+    FROM univ_ranking_dev.univ B
+    WHERE A.univ_code = B.`code`
+    ORDER BY B.outdated = 0 DESC,
+             B.outdated DESC
+    LIMIT 1
+)
+WHERE 1;
 
 
-
-
-
+UPDATE ub_details_raw.univ_rankings_cn A
+SET A.univ_id = (
+    SELECT B.id
+    FROM univ_ranking_dev.univ B
+    WHERE A.univ_code = B.`code`
+    ORDER BY B.outdated = 0 DESC,
+             B.outdated DESC
+    LIMIT 1
+)
+WHERE 1;
 
 
 
