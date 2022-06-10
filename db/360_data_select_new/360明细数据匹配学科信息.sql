@@ -85,7 +85,7 @@ WHERE A.var_code IN ( SELECT var_code_ub
 
 
 # 数据检查
-SELECT univ_code,var_code,ver_no,val,detail ->> '$.project_name' project_name,detail ->> '$.talent_name' talent_name
+SELECT dtl_id,univ_code,var_code,ver_no,val,detail ->> '$.project_name' project_name,detail ->> '$.talent_name' talent_name,rel_code,_eversions_,detail
 FROM `var_detail`
 WHERE var_code IN ( SELECT var_code_ub
                     FROM var_map_ub_spm
