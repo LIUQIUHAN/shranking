@@ -192,6 +192,9 @@ WHERE A.yr = 2022;*/
 
 
 
+
+
+
 # 国际大学排名
 INSERT INTO univ(/*id,*/ code, name_cn, name_en, /*logo,*/ up, country_id,/* region, found_year, address, website, intro, programs, key_stats,*/
                          outdated, remark/*, updated_at*/)
@@ -229,13 +232,132 @@ SET A.univ_id = (
 WHERE 1;
 
 
+# THE亚洲大学排名
+INSERT INTO rr_the_aur_rank (/*id, */yr, univ_id, univ_code, score, ranking, rank_country, score_precise,
+                                     ranking_precise, rank_country_precise, is_copy)
+SELECT /*id, */yr,
+               univ_id,
+               univ_code,
+               score,
+               ranking,
+               rank_region         rank_country,
+               score_precise       score_precise,
+               ranking_precise,
+               rank_region_precise rank_country_precise,
+               0                   is_copy
+FROM ub_details_raw.univ_rankings_int
+WHERE rank_code = 'RK021'
+  AND yr = 2022;
+
+# THE亚洲大学指标得分排名
+INSERT INTO rr_the_aur_ind_rank (/*id, */yr, ind_id, univ_id, univ_code, score, ranking)
+WITH ind_rank AS (
+    SELECT /*id, */
+        yr,
+        78                                                                       ind_id,
+        univ_id,
+        univ_code,
+        remark1 ->> '$."引用"'                                                  AS score,
+        (RANK() OVER (PARTITION BY '' ORDER BY (remark1 ->> '$."引用"') DESC )) AS ranking
+    FROM ub_details_raw.univ_rankings_int
+    WHERE rank_code = 'RK021'
+      AND yr = 2022
+    UNION ALL
+    SELECT /*id, */
+        yr,
+        79                                                                         ind_id,
+        univ_id,
+        univ_code,
+        remark1 ->> '$."企业收入"'                                                  AS score,
+        (RANK() OVER (PARTITION BY '' ORDER BY (remark1 ->> '$."企业收入"') DESC )) AS ranking
+    FROM ub_details_raw.univ_rankings_int
+    WHERE rank_code = 'RK021'
+      AND yr = 2022
+    UNION ALL
+    SELECT /*id, */
+        yr,
+        80                                                                        ind_id,
+        univ_id,
+        univ_code,
+        remark1 ->> '$."国际化"'                                                  AS score,
+        (RANK() OVER (PARTITION BY '' ORDER BY (remark1 ->> '$."国际化"') DESC )) AS ranking
+    FROM ub_details_raw.univ_rankings_int
+    WHERE rank_code = 'RK021'
+      AND yr = 2022
+    UNION ALL
+    SELECT /*id, */
+        yr,
+        81                                                                       ind_id,
+        univ_id,
+        univ_code,
+        remark1 ->> '$."科研"'                                                  AS score,
+        (RANK() OVER (PARTITION BY '' ORDER BY (remark1 ->> '$."科研"') DESC )) AS ranking
+    FROM ub_details_raw.univ_rankings_int
+    WHERE rank_code = 'RK021'
+      AND yr = 2022
+    UNION ALL
+    SELECT /*id, */
+        yr,
+        82                                                                       ind_id,
+        univ_id,
+        univ_code,
+        remark1 ->> '$."教学"'                                                  AS score,
+        (RANK() OVER (PARTITION BY '' ORDER BY (remark1 ->> '$."教学"') DESC )) AS ranking
+    FROM ub_details_raw.univ_rankings_int
+    WHERE rank_code = 'RK021'
+      AND yr = 2022
+)
+SELECT *
+FROM ind_rank;
 
 
+INSERT INTO univ(/*id,*/ code, name_cn, name_en, /*logo,*/ up, country_id,/* region, found_year, address, website, intro, programs, key_stats,*/
+                         outdated, remark/*, updated_at*/)
+SELECT 'RC01558',
+       '南京工业职业技术大学',
+       'Nanjing Vocational University of Industry Technology',
+       func_calc_univ_up('Nanjing Vocational University of Industry Technology', 'nanjinggongyezhiyejishudaxue'),
+       3201,
+       0,
+       '2022.06.09处理广州日报大学排名数据时添加';
 
+WITH A AS (SELECT yr,
+                  univ_code,
+                  score,
+                  province_code,
+                  RANK() OVER (PARTITION BY province_code ORDER BY score DESC ) rank_province
+           FROM ub_details_raw.univ_rankings_cn
+           WHERE rank_code = 'RK026'
+             AND yr = 2022)
+UPDATE ub_details_raw.univ_rankings_cn B JOIN A ON A.univ_code = B.univ_code
+SET B.rank_province = A.rank_province
+           WHERE B.rank_code = 'RK026'
+             AND B.yr = 2022;
 
-
-
-
+# 广州日报大学排名
+INSERT INTO rr_gzdur_rank (/* id, */yr, type_id, univ_cn_id, univ_code, score, ranking, rank_province,remark)
+SELECT /*id, */
+    yr,
+    (CASE
+         WHEN remark3 = '主榜' THEN 65
+         WHEN remark3 = '平行榜-医药类' THEN 66
+         WHEN remark3 = '平行榜-财经类' THEN 67
+         WHEN remark3 = '平行榜-政法类' THEN 68
+         WHEN remark3 = '平行榜-语言类' THEN 69
+         WHEN remark3 = '平行榜-民族类' THEN 70
+         WHEN remark3 = '平行榜-体育类' THEN 71
+         WHEN remark3 = '平行榜-合作办学类' THEN 72
+        END
+        ) type_id,
+    univ_id,
+    univ_code,
+    score,
+    ranking,
+    rank_province,
+    remark2
+FROM ub_details_raw.univ_rankings_cn
+WHERE rank_code = 'RK026'
+  AND yr = 2022;
 
 
 

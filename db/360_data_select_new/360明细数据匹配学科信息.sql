@@ -61,7 +61,7 @@ WHERE var_code IN ('subt', 'moerank', 'bcsr')
 
 
 # 更新360明细表中的学科信息
-UPDATE var_detail A JOIN var_detail_spm_0208 B ON A._eversions_ = B._eversions_ AND A.var_code = B.var_code AND
+UPDATE var_detail A JOIN spm_details_0208.var_detail B ON A._eversions_ = B._eversions_ AND A.var_code = B.var_code AND
                                                   A.univ_code = B.univ_code AND
                                                -- A.rel_code = B.talent_code AND
                                                   A.detail ->> '$.project_name' = B.detail ->> '$.project_name'
@@ -72,7 +72,7 @@ WHERE A.var_code IN ( SELECT var_code_ub
   AND A._eversions_ IN (202204,202205, 202206);
 
 
-UPDATE var_detail A JOIN var_detail_spm_0208 B ON A._eversions_ = B._eversions_ AND A.var_code = B.var_code AND
+UPDATE var_detail A JOIN spm_details_0208.var_detail B ON A._eversions_ = B._eversions_ AND A.var_code = B.var_code AND
                                                   A.univ_code = B.univ_code AND
                                                -- A.rel_code = B.talent_code AND
                                                   A.detail ->> '$.talent_name' = B.detail ->> '$.talent_name'
@@ -85,22 +85,56 @@ WHERE A.var_code IN ( SELECT var_code_ub
 
 
 # 数据检查
-SELECT *
+SELECT univ_code,var_code,ver_no,val,detail ->> '$.project_name' project_name,detail ->> '$.talent_name' talent_name
 FROM `var_detail`
 WHERE var_code IN ( SELECT var_code_ub
                     FROM var_map_ub_spm
                     WHERE match_field_ub = match_field_spm
                       AND match_field_ub IN ('talent_name', 'project_name') )
   AND subject_code = ''
-  AND _eversions_ = 202203
-  AND univ_code != 'XXXXX';
+  AND _eversions_ BETWEEN 202205 AND 202206
+  AND univ_code != 'XXXXX'
+ORDER BY _eversions_,var_code;
+
+
+
+
+UPDATE var_detail A JOIN spm_details_0208.var_detail B ON A._eversions_ = B._eversions_ AND A.var_code = B.var_code AND
+                                                  A.univ_code = B.univ_code AND
+                                               -- A.rel_code = B.talent_code AND
+                                                  A.detail ->> '$.project_name' = B.detail ->> '$.project_name'
+SET A.subject_code = B.subj_code
+WHERE A.var_code IN ( SELECT var_code_ub
+                      FROM var_map_ub_spm
+                      WHERE match_field_ub = match_field_spm AND match_field_ub = 'project_name' )
+  AND A.detail ->> '$.project_name' != '';
+
+UPDATE var_detail A JOIN spm_details_0208.var_detail B ON A._eversions_ = B._eversions_ AND A.var_code = B.var_code AND
+                                                  A.univ_code = B.univ_code AND
+                                                  A.rel_code = B.talent_code AND
+                                                  A.ver_no = B.ver_no
+SET A.subject_code = B.subj_code
+WHERE A.var_code IN ( SELECT var_code_ub
+                      FROM var_map_ub_spm
+                      WHERE match_field_ub = match_field_spm AND match_field_ub = 'talent_name' )
+;
 
 
 
 
 
 
-
+UPDATE var_detail A JOIN spm_details_0208.var_detail B ON -- A._eversions_ = B._eversions_ AND
+                                                  A.var_code = B.var_code AND
+                                               -- A.univ_code = B.univ_code AND
+                                               -- A.rel_code = B.talent_code AND
+                                                  A.detail ->> '$.project_name' = B.detail ->> '$.project_name'
+SET A.subject_code = B.subj_code
+WHERE A.var_code IN ( SELECT var_code_ub
+                      FROM var_map_ub_spm
+                      WHERE match_field_ub = match_field_spm AND match_field_ub = 'project_name' )
+  AND A.detail ->> '$.project_name' != ''
+  AND A.subject_code = '';
 
 
 
