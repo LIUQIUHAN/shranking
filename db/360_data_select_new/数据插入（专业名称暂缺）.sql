@@ -1,5 +1,6 @@
 USE ub_details_0429;
 
+CREATE TEMPORARY TABLE diff_val_ben_1
 WITH A AS (
     SELECT r_ver_no, univ_code, val
     FROM ub_ranking_dev.ind_value_2020
@@ -97,7 +98,7 @@ SELECT 0                             revision,
 FROM j
 ORDER BY univ_code, j.r_ver_no, n;
 
-UPDATE var_detail A
+/*UPDATE var_detail A
 SET detail = JSON_SET(detail,
                       '$.remark1', NULL,
                       '$.remark2', rel_code,
@@ -114,7 +115,7 @@ SET detail = JSON_SET(detail,
                       '$.elected_year', 2019,
                       '$.project_name', '专业名称暂缺',
                       '$.project_money', 0)
-WHERE created_by = -2;
+WHERE created_by = -2;*/
 
 
 

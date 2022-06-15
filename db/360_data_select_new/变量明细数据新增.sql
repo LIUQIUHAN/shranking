@@ -87,74 +87,89 @@ WHERE 1;
 
 
 
-# 更新指标表数据年份信息
--- 变量
-UPDATE ub_ranking_dev.indicator_latest
-SET detail = JSON_SET(detail, '$.availVer', '2015-2021', '$.targetVer', '2017-2021')
-WHERE code IN (
-               'posaward',
-               'psaward2',
-               'psaward4',
-               'psaward6',
-               'psaward8',
-               'psaward9',
-               'ptaward'
-    ) AND level = 4;
-
-UPDATE ub_ranking_dev.indicator_latest
-SET detail = JSON_SET(detail, '$.availVer', '2016-2021', '$.targetVer', '2017-2021')
-WHERE code = 'pysaward' AND level = 4;
-
--- 指标
-UPDATE ub_ranking_dev.indicator_latest
-SET detail = JSON_SET(detail, '$.availVer', '2015-2021', '$.targetVer', '2017-2021')
-WHERE code IN (
-               -- 'pacourse', 0-2021
-               'ptaward',
-               'ptadwt',
-               'psaward',
-               'psadwt',
-               'psaward9',
-               'psaward2',
-               'psaward1',
-               'psaward4',
-               'psaward3',
-               'psaward6',
-               'psaward5',
-               'psaward8',
-               'psaward7',
-               'pysaward',
-               'posaward'
-    )
-  AND level = 3;
-
-UPDATE ub_ranking_dev.indicator_latest
-SET detail = JSON_SET(detail, '$.availVer', '2016-2021', '$.targetVer', '2017-2021')
-WHERE code = 'pysaward' AND level = 3;
 
 
--- 更新标签
-UPDATE ub_ranking_dev.indicator_latest SET change_type = 1
-WHERE code IN (
-               'pacourse',
-               'ptaward',
-               'ptadwt',
-               'psaward',
-               'psadwt',
-               'psaward9',
-               'psaward2',
-               'psaward1',
-               'psaward4',
-               'psaward3',
-               'psaward6',
-               'psaward5',
-               'psaward8',
-               'psaward7',
-               'pysaward',
-               'posaward',
-               'pysaward'
-    )
-  AND level = 3;
+-- 省级一流本科专业
+INSERT INTO var_detail (/*dtl_id,*/ revision, var_id, var_code, source_id, ver_no, univ_code, lev, val, detail,
+                                    subject_code, rel_code, agg_from, _eversions_, _r_ver_no, created_at, created_by,
+                                    updated_at, updated_by, deleted_at, deleted_by)
+SELECT 0           revision,
+       215         var_id,
+       var_code,
+       5           source_id,
+       ver_no,
+       univ_code,
+       0           lev,
+       1           val,
+       JSON_OBJECT(
+               'remark1', remark,
+               'remark2', rel_code,
+               'born_year', NULL,
+               'dead_year', NULL,
+               'effective', '1',
+               'award_level', NULL,
+               'talent_name', NULL,
+               'current_code', NULL,
+               'current_name', NULL,
+               'elected_code', univ_code,
+               'elected_name', univ_name,
+               'elected_year', ver_no,
+               'project_name', project_name,
+               'project_money', 0.0) AS
+                   detail,
+       ''          subject_code,
+       IFNULL(rel_code,0)    rel_code,
+       0           agg_from,
+       202207      _eversions_,
+       202207      _r_ver_no,
+       create_time,
+       -2          created_by,
+       create_time updated_at,
+       NULL        updated_by,
+       NULL        deleted_at,
+       NULL        deleted_by
+FROM ub_details_raw.`first_major_data_2019-2020`
+WHERE var_code = 'pccourse';
 
--- 检测指标信息
+-- 国家级一流本科专业
+INSERT INTO var_detail (/*dtl_id,*/ revision, var_id, var_code, source_id, ver_no, univ_code, lev, val, detail,
+                                    subject_code, rel_code, agg_from, _eversions_, _r_ver_no, created_at, created_by,
+                                    updated_at, updated_by, deleted_at, deleted_by)
+SELECT 0           revision,
+       8           var_id,
+       var_code,
+       4          source_id,
+       ver_no,
+       univ_code,
+       0           lev,
+       1           val,
+       JSON_OBJECT(
+               'remark1', NULL,
+               'remark2', rel_code,
+               'born_year', NULL,
+               'dead_year', NULL,
+               'effective', '1',
+               'award_level', NULL,
+               'talent_name', NULL,
+               'current_code', NULL,
+               'current_name', NULL,
+               'elected_code', univ_code,
+               'elected_name', univ_name,
+               'elected_year', ver_no,
+               'project_name', project_name,
+               'project_money', 0.0) AS
+                   detail,
+       ''          subject_code,
+       rel_code    rel_code,
+       0           agg_from,
+       202207      _eversions_,
+       202207      _r_ver_no,
+       create_time,
+       -2          created_by,
+       create_time updated_at,
+       NULL        updated_by,
+       NULL        deleted_at,
+       NULL        deleted_by
+FROM ub_details_raw.`first_major_data_2019-2020`
+WHERE var_code = 'ben1';
 

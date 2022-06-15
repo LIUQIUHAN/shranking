@@ -41,3 +41,74 @@ UPDATE indicator i JOIN tree t ON i.id = t.id
 SET i.path = IFNULL(t.new_path, '')
 WHERE i.id > 0;
 
+
+
+# 更新指标表数据年份信息
+-- 变量
+UPDATE ub_ranking_dev.indicator_latest
+SET detail = JSON_SET(detail, '$.availVer', '2015-2021', '$.targetVer', '2017-2021')
+WHERE code IN (
+               'posaward',
+               'psaward2',
+               'psaward4',
+               'psaward6',
+               'psaward8',
+               'psaward9',
+               'ptaward'
+    ) AND level = 4;
+
+UPDATE ub_ranking_dev.indicator_latest
+SET detail = JSON_SET(detail, '$.availVer', '2016-2021', '$.targetVer', '2017-2021')
+WHERE code = 'pysaward' AND level = 4;
+
+-- 指标
+UPDATE ub_ranking_dev.indicator_latest
+SET detail = JSON_SET(detail, '$.availVer', '2015-2021', '$.targetVer', '2017-2021')
+WHERE code IN (
+               -- 'pacourse', 0-2021
+               'ptaward',
+               'ptadwt',
+               'psaward',
+               'psadwt',
+               'psaward9',
+               'psaward2',
+               'psaward1',
+               'psaward4',
+               'psaward3',
+               'psaward6',
+               'psaward5',
+               'psaward8',
+               'psaward7',
+               'posaward'
+    )
+  AND level = 3;
+
+UPDATE ub_ranking_dev.indicator_latest
+SET detail = JSON_SET(detail, '$.availVer', '2016-2021', '$.targetVer', '2017-2021')
+WHERE code = 'pysaward' AND level = 3;
+
+
+-- 更新标签
+UPDATE ub_ranking_dev.indicator_latest SET change_type = 1
+WHERE code IN (
+               'pacourse',
+               'ptaward',
+               'ptadwt',
+               'psaward',
+               'psadwt',
+               'psaward9',
+               'psaward2',
+               'psaward1',
+               'psaward4',
+               'psaward3',
+               'psaward6',
+               'psaward5',
+               'psaward8',
+               'psaward7',
+               'pysaward',
+               'posaward',
+               'pysaward'
+    )
+  AND level = 3;
+
+-- 检测指标信息
