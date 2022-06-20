@@ -7,7 +7,7 @@ SET @Date_import = '2022-05-19';
 INSERT INTO ub_details_0429.var_detail ( dtl_id, revision, var_id, var_code, source_id, ver_no, univ_code, lev, val,
                                          agg_from, created_by )
 WITH dtls AS ( SELECT ( SELECT var_id
-                        FROM ub_ranking_0520.v_ind_lat_l4_flat_wide C
+                        FROM ub_ranking_dev.v_ind_lat_l4_flat_wide C
                         WHERE A.target_code = C.code )                    AS var_id,
                       target_code                                         AS var_code,
 
@@ -91,7 +91,7 @@ SELECT B.dtl_id,
        A.lev,
        A.val,
        A.agg_from,
-       -1                                           AS created_by
+       -2                                           AS created_by
 FROM dtls                                 A
      LEFT JOIN ub_details_0429.var_detail B
                ON A.var_code = B.var_code AND A.source_id = B.source_id AND A.ver_no = B.ver_no AND

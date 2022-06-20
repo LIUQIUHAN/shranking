@@ -2,7 +2,7 @@
 
 USE ub_ranking_0520;
 
-SET @rVerNo = @rVerNo;
+SET @rVerNo = 202203;
 DROP TEMPORARY TABLE IF EXISTS ind_zhiliang;
 CREATE TEMPORARY TABLE ind_zhiliang
 (

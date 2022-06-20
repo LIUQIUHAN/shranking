@@ -1,8 +1,8 @@
 # 老360平台客户帐号信息、标杆数据迁移至新360平台
 
-/*USE src_product;
+USE src_product;
 # 更新user_360表中create_id
-UPDATE user_360
+/*UPDATE user_360
 SET create_id = 51 -- 51 = 'baobei.yu'
 WHERE 1;
 UPDATE user_360 A JOIN admin_user B ON A.create_name = B.user_name

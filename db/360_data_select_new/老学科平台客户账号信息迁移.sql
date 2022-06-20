@@ -13,7 +13,6 @@ SET A.tcode = (SELECT code
                LIMIT 1)
 WHERE 1;
 
-
 # 账号信息数据
 /*INSERT INTO user ( user_name, login_name, email, mobile, role_id, user_group, univ_code, name, sex, department,
                    position, title, remark, frozen_at, password_md5, password_salt, password_hash, sms_code,

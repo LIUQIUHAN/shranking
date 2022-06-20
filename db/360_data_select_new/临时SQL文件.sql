@@ -29,3 +29,80 @@ WHERE indicatorCode = '2'
 
 
 
+/*USE ub_ranking_dev;
+SELECT val ->> '$.resetEffectVer'
+FROM indicator_latest
+WHERE `code` IN (
+                 'pccourse',
+                 'pacourse',
+                 'ptadwt',
+                 'ptaward',
+                 'posaward',
+                 'psadwt',
+                 'psaward',
+                 'psaward1',
+                 'psaward2',
+                 'psaward3',
+                 'psaward4',
+                 'psaward5',
+                 'psaward6',
+                 'psaward7',
+                 'psaward8',
+                 'psaward9',
+                 'pysaward',
+                 'ppsaward',
+                 'ppsawarw'
+    )
+  AND `level` = 3;
+
+UPDATE indicator_latest
+SET val = JSON_SET(val, '$.resetEffectVer', 'true')
+WHERE `code` IN (
+                 'pccourse',
+                 'pacourse',
+                 'ptadwt',
+                 'ptaward',
+                 'posaward',
+                 'psadwt',
+                 'psaward',
+                 'psaward1',
+                 'psaward2',
+                 'psaward3',
+                 'psaward4',
+                 'psaward5',
+                 'psaward6',
+                 'psaward7',
+                 'psaward8',
+                 'psaward9',
+                 'pysaward',
+                 'ppsaward',
+                 'ppsawarw'
+    )
+  AND `level` = 3;
+
+UPDATE ind_value_latest SET effect_ver = target_ver
+WHERE ind_code in  (
+                 'pccourse',
+                 'pacourse',
+                 'ptadwt',
+                 'ptaward',
+                 'posaward',
+                 'psadwt',
+                 'psaward',
+                 'psaward1',
+                 'psaward2',
+                 'psaward3',
+                 'psaward4',
+                 'psaward5',
+                 'psaward6',
+                 'psaward7',
+                 'psaward8',
+                 'psaward9',
+                 'pysaward',
+                 'ppsaward',
+                 'ppsawarw'
+    );
+*/
+
+
+
