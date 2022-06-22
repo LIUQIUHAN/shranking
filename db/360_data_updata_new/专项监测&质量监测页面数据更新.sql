@@ -11,7 +11,7 @@ SET @rowNum = 0;
 
 # 指标信息更新 derived_ranking_instance   &   derived_indicator
 # derived_ranking_instance
--- /*
+/*
 INSERT INTO derived_ranking_instance (id, ver_no, version, type_id, scheme_type_id, name, code, weight_scheme_id,
                                       num_listed, num_published, issue_status, issued_at, issue_date, reviewed_by,
                                       method_file, remark, created_at, created_by, updated_at, updated_by, deleted_at,
@@ -159,15 +159,19 @@ WHERE I.r_ver_no = @rVerNo
   AND I.name RLIKE '均'
   AND I.shows = ''
   AND NOT EXISTS(SELECT * FROM derived_indicator DI WHERE DI.r_ver_no = @rVerNo AND I.code = DI.code AND r_leaf_id = 1);
--- */
-
-
+*/
 
 
 # 数据更新
 SET FOREIGN_KEY_CHECKS = 0;
-DELETE FROM derived_ind_score_2022 WHERE r_ver_no = @rVerNo AND r_leaf_id IN (@rLeafId_0, @rLeafId_1, @rLeafId_2, @rLeafId_3,@rLeafId_4);
-DELETE FROM derived_ranking_list   WHERE r_ver_no = @rVerNo AND r_leaf_id IN (@rLeafId_0, @rLeafId_1, @rLeafId_2, @rLeafId_3,@rLeafId_4);
+DELETE
+FROM derived_ind_score_2022
+WHERE r_ver_no = @rVerNo
+  AND r_leaf_id IN (@rLeafId_0, @rLeafId_1, @rLeafId_2, @rLeafId_3, @rLeafId_4);
+DELETE
+FROM derived_ranking_list
+WHERE r_ver_no = @rVerNo
+  AND r_leaf_id IN (@rLeafId_0, @rLeafId_1, @rLeafId_2, @rLeafId_3, @rLeafId_4);
 # 插入指标得分与排名-专项监测
 # TRUNCATE TABLE derived_ind_score_2022;
 INSERT INTO derived_ind_score_2022(r_ver_no,
@@ -196,30 +200,31 @@ SELECT r_ver_no,
             WHEN ind_code IN (SELECT code FROM derived_indicator WHERE r_leaf_id = @rLeafId_1) THEN @rLeafId_1
             WHEN ind_code IN (SELECT code FROM derived_indicator WHERE r_leaf_id = @rLeafId_2) THEN @rLeafId_2
             WHEN ind_code IN (SELECT code FROM derived_indicator WHERE r_leaf_id = @rLeafId_3)
-                THEN @rLeafId_3 END)                                                                    r_leaf_id,
+                THEN @rLeafId_3 END)                                           AS r_leaf_id,
        (SELECT id
         FROM derived_indicator B
         WHERE B.code = A.ind_code
           AND B.level != 4
           AND B.r_ver_no = @rVerNo
-          AND B.r_leaf_id IN (@rLeafId_0, @rLeafId_1, @rLeafId_2, @rLeafId_3)) AS                       ind_id,
+          AND B.r_leaf_id IN (@rLeafId_0, @rLeafId_1, @rLeafId_2, @rLeafId_3)) AS ind_id,
        ind_code,
        univ_code,
-       0                                                                                                is_same_type,   -- 该字段在数据中未体现，用一个默认值替代（正超）
-       (IFNULL(pre_score, 0) * (SELECT B.score ->> '$.defaultWeight'
+       0                                                                       AS is_same_type,                  -- 该字段在数据中未体现，用一个默认值替代（正超）
+/*       (IFNULL(pre_score, 0) * (SELECT B.score ->> '$.defaultWeight'
                                 FROM derived_indicator B
                                 WHERE B.code = A.ind_code
                                   AND B.level != 4
                                   AND B.r_ver_no = @rVerNo
-                                  AND B.r_leaf_id IN (@rLeafId_0, @rLeafId_1, @rLeafId_2, @rLeafId_3))) score,          -- 非初始得分： 指标比例得分*指标权重 = 指标最终得分
-       0                                                                                                score_rank_typ, -- 该字段在数据中未体现，用一个默认值替代（正超）
-       0                                                                                                score_rank_all, -- 指标最终得分排名：后面计算更新
+                                  AND B.r_leaf_id IN (@rLeafId_0, @rLeafId_1, @rLeafId_2, @rLeafId_3))) score,*/ -- 非初始得分： 指标比例得分*指标权重 = 指标最终得分
+       0                                                                       AS score,
+       0                                                                          score_rank_typ,                -- 该字段在数据中未体现，用一个默认值替代（正超）
+       0                                                                       AS score_rank_all,                -- 指标最终得分排名：后面计算更新
        val,
-       0,                                                                                                               -- 该字段在数据中未体现，用一个默认值替代（正超）
-       val_rank_all,                                                                                                    -- 指标数据值排名（需重新计算排名，因为排名对象发生了变化）
+       0,                                                                                                        -- 该字段在数据中未体现，用一个默认值替代（正超）
+       val_rank_all,                                                                                             -- 指标数据值排名（需重新计算排名，因为排名对象发生了变化）
        var_details,
        effect_ver,
-       pre_score,
+       0                                                                       AS pre_score,
        alt_val,
        eff_src_ids
 FROM ind_value_2022 A
@@ -254,37 +259,54 @@ INSERT INTO derived_ind_score_2022(r_ver_no,
     -- updated_at
 )
 SELECT r_ver_no,
-       @rLeafId_4 AS                                             r_leaf_id,
+       @rLeafId_4 AS r_leaf_id,
        (SELECT id
         FROM derived_indicator B
         WHERE B.code = A.ind_code
           AND B.level != 4
           AND B.r_ver_no = @rVerNo
           AND B.r_leaf_id = @rLeafId_4
-       )          AS                                             ind_id,
+       )          AS ind_id,
        ind_code,
        univ_code,
-       0                                                         is_same_type,   -- 该字段在数据中未体现，用一个默认值替代（正超）
-       (IFNULL(pre_score, 0) * (SELECT B.score ->> '$.defaultWeight'
+       0          AS is_same_type,                                         -- 该字段在数据中未体现，用一个默认值替代（正超）
+/*       (IFNULL(pre_score, 0) * (SELECT B.score ->> '$.defaultWeight'
                                 FROM derived_indicator B
                                 WHERE B.code = A.ind_code
                                   AND B.level != 4
                                   AND B.r_ver_no = @rVerNo
-                                  AND B.r_leaf_id = @rLeafId_4)) score,          -- 非初始得分： 指标比例得分*指标权重 = 指标最终得分
-       0                                                         score_rank_typ, -- 该字段在数据中未体现，用一个默认值替代（正超）
-       0                                                         score_rank_all, -- 指标最终得分排名：后面计算更新
+                                  AND B.r_leaf_id = @rLeafId_4)) score, */ -- 非初始得分： 指标比例得分*指标权重 = 指标最终得分
+       0          AS score,
+       0          AS score_rank_typ,                                       -- 该字段在数据中未体现，用一个默认值替代（正超）
+       0          AS score_rank_all,                                       -- 指标最终得分排名：后面计算更新
        val,
-       0,                                                                        -- 该字段在数据中未体现，用一个默认值替代（正超）
-       val_rank_all,                                                             -- 指标数据值排名（需重新计算排名，因为排名对象发生了变化）
+       0,                                                                  -- 该字段在数据中未体现，用一个默认值替代（正超）
+       val_rank_all,                                                       -- 指标数据值排名（需重新计算排名，因为排名对象发生了变化）
        var_details,
        effect_ver,
-       pre_score,
+       0          AS pre_score,
        alt_val,
        eff_src_ids
 FROM ind_value_2022 A
 WHERE r_ver_no = @rVerNo
   AND ind_code IN (SELECT code FROM derived_indicator WHERE r_leaf_id = @rLeafId_4 AND r_ver_no = @rVerNo);
 
+# 计算指标得分（比例值*权重）
+WITH M AS (SELECT r_ver_no, ind_code, MAX(val) max_val
+           FROM derived_ind_score_2022
+           WHERE r_ver_no = @rVerNo
+           GROUP BY ind_code)
+UPDATE derived_ind_score_2022 A JOIN M ON A.ind_code = M.ind_code AND A.r_ver_no = M.r_ver_no
+SET A.pre_score = (A.val / M.max_val),
+    A.score     = (A.val / M.max_val) * (SELECT B.score ->> '$.defaultWeight'
+                                         FROM derived_indicator B
+                                         WHERE B.code = A.ind_code
+                                           AND B.level != 4
+                                           AND B.r_ver_no = @rVerNo
+                                           AND A.r_leaf_id = B.r_leaf_id)
+WHERE A.r_ver_no = @rVerNo
+  AND A.r_leaf_id IN (@rLeafId_0, @rLeafId_1, @rLeafId_2, @rLeafId_3, @rLeafId_4)
+;
 
 # 计算指标得分排名、指标数据值排名
 WITH ranks AS (SELECT r_leaf_id,
@@ -401,7 +423,8 @@ HAVING ROUND(SUM(score), 1) != 0;
 # 收尾工作
 WITH num AS (SELECT r_leaf_id, COUNT(*) num_listed
              FROM derived_ranking_list
-             WHERE score != 0 AND r_ver_no = @rVerNo
+             WHERE score != 0
+               AND r_ver_no = @rVerNo
              GROUP BY r_leaf_id)
 UPDATE derived_ranking_instance A,num
 SET A.num_listed = num.num_listed
@@ -410,6 +433,7 @@ WHERE A.type_id = num.r_leaf_id
   AND A.type_id IN (@rLeafId_0, @rLeafId_1, @rLeafId_2, @rLeafId_3, @rLeafId_4)
 ;
 SET FOREIGN_KEY_CHECKS = 1;
+
 
 
 

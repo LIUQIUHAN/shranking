@@ -104,10 +104,16 @@ FROM ub_details_raw._generalsources_new_name
 WHERE generalSources RLIKE '见指标';
 
 
+# 更新最新版本指标值来源和最新指标值表来源
+UPDATE ind_value_latest
+SET eff_src_ids = 88
+WHERE ind_code IN (SELECT C.code FROM ub_details_raw._generalsources_new_name C WHERE C.generalSources RLIKE '见指标');
 
 
-
-
+UPDATE ind_value_2022
+SET eff_src_ids = 88
+WHERE ind_code IN (SELECT C.code FROM ub_details_raw._generalsources_new_name C WHERE C.generalSources RLIKE '见指标')
+  AND r_ver_no = 202207;
 
 
 

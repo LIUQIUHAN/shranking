@@ -1,9 +1,9 @@
-USE ub_details_raw;
-
 # 导入本次更新的数据
 
 -- 注： 更新 @Date_import 后执行
-SET @Date_import = '2022-05-19';
+USE ub_details_raw;
+SET @Date_import = '2022-06-22';
+
 INSERT INTO ub_details_0429.var_detail ( dtl_id, revision, var_id, var_code, source_id, ver_no, univ_code, lev, val,
                                          agg_from, created_by )
 WITH dtls AS ( SELECT ( SELECT var_id
@@ -11,13 +11,13 @@ WITH dtls AS ( SELECT ( SELECT var_id
                         WHERE A.target_code = C.code )                    AS var_id,
                       target_code                                         AS var_code,
 
-                      ( SELECT _new_src_id
+                      ( SELECT src_id
                         FROM ub_ranking_0520.c_ind_source B
                         WHERE A.data_source_id = B._old_src_id
                           AND A.target_code = B.ind_code
                           AND b._new_src_id IS NOT NULL )                 AS source_id,
                       IF(target_code = 'i101', 0, LEFT(data_year, 4))     AS ver_no,
-                      func_school_code_tr_now_code(school_code)           AS univ_code,
+                      univ_code,
                       0                                                   AS lev,
                       target_val                                          AS val,
                       IF(LENGTH(target_code) > 4, RIGHT(data_year, 4), 0) AS agg_from

@@ -82,7 +82,7 @@ SELECT 0           revision,
        NULL        updated_by,
        NULL        deleted_at,
        NULL        deleted_by
-FROM ub_details_raw.`provincial_first_class_data_2019-2021`
+FROM ub_details_raw.provincial_first_class_data_20220613
 WHERE 1;
 
 
@@ -128,7 +128,7 @@ SELECT 0           revision,
        NULL        updated_by,
        NULL        deleted_at,
        NULL        deleted_by
-FROM ub_details_raw.`first_major_data_2019-2020`
+FROM ub_details_raw.first_major_data_20220613
 WHERE var_code = 'pccourse';
 
 -- 国家级一流本科专业
@@ -170,6 +170,6 @@ SELECT 0           revision,
        NULL        updated_by,
        NULL        deleted_at,
        NULL        deleted_by
-FROM ub_details_raw.`first_major_data_2019-2020`
+FROM ub_details_raw.first_major_data_20220613
 WHERE var_code = 'ben1';
 
