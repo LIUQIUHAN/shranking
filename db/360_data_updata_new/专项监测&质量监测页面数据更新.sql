@@ -217,7 +217,7 @@ SELECT r_ver_no,
                                   AND B.r_ver_no = @rVerNo
                                   AND B.r_leaf_id IN (@rLeafId_0, @rLeafId_1, @rLeafId_2, @rLeafId_3))) score,*/ -- 非初始得分： 指标比例得分*指标权重 = 指标最终得分
        0                                                                       AS score,
-       0                                                                          score_rank_typ,                -- 该字段在数据中未体现，用一个默认值替代（正超）
+       0                                                                       AS score_rank_typ,                -- 该字段在数据中未体现，用一个默认值替代（正超）
        0                                                                       AS score_rank_all,                -- 指标最终得分排名：后面计算更新
        val,
        0,                                                                                                        -- 该字段在数据中未体现，用一个默认值替代（正超）
@@ -301,9 +301,9 @@ SET A.pre_score = (A.val / M.max_val),
     A.score     = (A.val / M.max_val) * (SELECT B.score ->> '$.defaultWeight'
                                          FROM derived_indicator B
                                          WHERE B.code = A.ind_code
+                                           AND B.r_leaf_id = A.r_leaf_id
                                            AND B.level != 4
-                                           AND B.r_ver_no = @rVerNo
-                                           AND A.r_leaf_id = B.r_leaf_id)
+                                           AND B.r_ver_no = @rVerNo)
 WHERE A.r_ver_no = @rVerNo
   AND A.r_leaf_id IN (@rLeafId_0, @rLeafId_1, @rLeafId_2, @rLeafId_3, @rLeafId_4)
 ;

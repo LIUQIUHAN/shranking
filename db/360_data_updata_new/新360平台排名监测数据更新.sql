@@ -1,6 +1,6 @@
 USE univ_ranking_dev;
 # 1.1 导入武书连排名数据
-INSERT INTO rr_qjp_rank ( yr, univ_id, univ_code, province_code, score, ranking, rank_province )
+INSERT INTO rr_qjp_rank (yr, univ_id, univ_code, province_code, score, ranking, rank_province)
 SELECT yr, 0 univ_id, univ_code, 0 province_code, score, ranking, rank_province
 FROM ub_details_raw._univ_rankings_cn
 WHERE rank_code = 'wsl'
@@ -14,11 +14,11 @@ WITH d AS (SELECT r.id,
                    WHERE u.code = r.univ_code
                    ORDER BY outdated = 0 DESC, outdated DESC
                    LIMIT 1) univ_id,
-                (SELECT uc.province_code
+                  (SELECT uc.province_code
                    FROM univ_cn uc
                    WHERE uc.code = r.univ_code
                    ORDER BY outdated = 0 DESC, outdated DESC
-                   LIMIT 1)province_code
+                   LIMIT 1) province_code
            FROM rr_wsl_rank r
            WHERE r.yr = 2022)
 SELECT *
@@ -41,23 +41,18 @@ WITH d AS (SELECT r.id,
                    FROM univ_cn uc
                    WHERE uc.code = r.univ_code
                    ORDER BY outdated = 0 DESC, outdated DESC
-                   LIMIT 1)province_code
+                   LIMIT 1) province_code
            FROM rr_wsl_rank r
            WHERE r.yr = 2022)
 UPDATE rr_wsl_rank r JOIN d ON r.id = d.id
-SET r.univ_id=d.univ_id,r.province_code=d.province_code
+SET r.univ_id=d.univ_id,
+    r.province_code=d.province_code
 WHERE TRUE;
-
-
-
-
-
-
 
 
 # 2.1 导入邱均平排名数据
 
-INSERT INTO rr_qjp_rank ( yr, univ_id, univ_code, province_code, score, ranking, rank_province )
+INSERT INTO rr_qjp_rank (yr, univ_id, univ_code, province_code, score, ranking, rank_province)
 SELECT yr, 0 univ_id, univ_code, 0 province_code, score, ranking, rank_province
 FROM ub_details_raw._univ_rankings_cn
 WHERE rank_code = 'qjp'
@@ -71,11 +66,11 @@ WITH d AS (SELECT r.id,
                    WHERE u.code = r.univ_code
                    ORDER BY outdated = 0 DESC, outdated DESC
                    LIMIT 1) univ_id,
-                (SELECT uc.province_code
+                  (SELECT uc.province_code
                    FROM univ_cn uc
                    WHERE uc.code = r.univ_code
                    ORDER BY outdated = 0 DESC, outdated DESC
-                   LIMIT 1)province_code
+                   LIMIT 1) province_code
            FROM rr_qjp_rank r
            WHERE r.yr = 2022)
 SELECT *
@@ -92,29 +87,21 @@ WITH d AS (SELECT r.id,
                    WHERE u.code = r.univ_code
                    ORDER BY outdated = 0 DESC, outdated DESC
                    LIMIT 1) univ_id,
-                (SELECT uc.province_code
+                  (SELECT uc.province_code
                    FROM univ_cn uc
                    WHERE uc.code = r.univ_code
                    ORDER BY outdated = 0 DESC, outdated DESC
-                   LIMIT 1)province_code
+                   LIMIT 1) province_code
            FROM rr_qjp_rank r
            WHERE r.yr = 2022)
 UPDATE rr_qjp_rank r JOIN d ON r.id = d.id
-SET r.univ_id=d.univ_id ,r.province_code=d.province_code
+SET r.univ_id=d.univ_id,
+    r.province_code=d.province_code
 WHERE TRUE;
 
 
-
-
-
-
-
-
-
-
-
 # 3.1 导入校友会排名数据
-INSERT INTO rr_qjp_rank ( yr, univ_id, univ_code, province_code, score, ranking, rank_province )
+INSERT INTO rr_qjp_rank (yr, univ_id, univ_code, province_code, score, ranking, rank_province)
 SELECT yr, 0 univ_id, univ_code, 0 province_code, score, ranking, rank_province
 FROM ub_details_raw._univ_rankings_cn
 WHERE rank_code = 'xyh'
@@ -128,11 +115,11 @@ WITH d AS (SELECT r.id,
                    WHERE u.code = r.univ_code
                    ORDER BY outdated = 0 DESC, outdated DESC
                    LIMIT 1) univ_id,
-                (SELECT uc.province_code
+                  (SELECT uc.province_code
                    FROM univ_cn uc
                    WHERE uc.code = r.univ_code
                    ORDER BY outdated = 0 DESC, outdated DESC
-                   LIMIT 1)province_code
+                   LIMIT 1) province_code
            FROM rr_xyh_rank r
            WHERE r.yr = 2022)
 SELECT *
@@ -140,8 +127,12 @@ FROM d
 WHERE d.univ_id IS NULL;
 
 # 3.3 在univ表添加缺少的记录
-SELECT * FROM univ WHERE name_cn = '安徽艺术学院';
-SELECT * FROM univ_cn WHERE _code_old = 'A0815';
+SELECT *
+FROM univ
+WHERE name_cn = '安徽艺术学院';
+SELECT *
+FROM univ_cn
+WHERE _code_old = 'A0815';
 INSERT INTO univ(/*id,*/ code, name_cn, name_en, /*logo,*/ up, country_id,/* region, found_year, address, website, intro, programs, key_stats,*/
                          outdated, remark/*, updated_at*/)
 SELECT 'RC01552',
@@ -160,21 +151,17 @@ WITH d AS (SELECT r.id,
                    WHERE u.code = r.univ_code
                    ORDER BY outdated = 0 DESC, outdated DESC
                    LIMIT 1) univ_id,
-                (SELECT uc.province_code
+                  (SELECT uc.province_code
                    FROM univ_cn uc
                    WHERE uc.code = r.univ_code
                    ORDER BY outdated = 0 DESC, outdated DESC
-                   LIMIT 1)province_code
+                   LIMIT 1) province_code
            FROM rr_xyh_rank r
            WHERE r.yr = 2022)
 UPDATE rr_xyh_rank r JOIN d ON r.id = d.id
-SET r.univ_id=d.univ_id,r.province_code=d.province_code
+SET r.univ_id=d.univ_id,
+    r.province_code=d.province_code
 WHERE TRUE;
-
-
-
-
-
 
 
 
@@ -189,10 +176,6 @@ WHERE A.yr = 2022;
 UPDATE rr_xyh_rank A JOIN ub_details_raw.rr_xyh_rank B ON A.univ_code = B.univ_code
 SET A.score = B.score
 WHERE A.yr = 2022;*/
-
-
-
-
 
 
 # 国际大学排名
@@ -331,11 +314,11 @@ WITH A AS (SELECT yr,
              AND yr = 2022)
 UPDATE ub_details_raw._univ_rankings_cn B JOIN A ON A.univ_code = B.univ_code
 SET B.rank_province = A.rank_province
-           WHERE B.rank_code = 'RK026'
-             AND B.yr = 2022;
+WHERE B.rank_code = 'RK026'
+  AND B.yr = 2022;
 
 # 广州日报大学排名
-INSERT INTO rr_gzdur_rank (/* id, */yr, type_id, univ_cn_id, univ_code, score, ranking, rank_province,remark)
+INSERT INTO rr_gzdur_rank (/* id, */yr, type_id, univ_cn_id, univ_code, score, ranking, rank_province, remark)
 SELECT /*id, */
     yr,
     (CASE
@@ -373,20 +356,18 @@ WITH ranking AS (
             WHERE A.univ_code = B.code
             ORDER BY B.outdated = 0 DESC,
                      B.outdated DESC
-            LIMIT 1)                   AS                                 univ_id,
+            LIMIT 1)                   AS                              univ_id,
            univ_code,
            univ_name_cn,
            univ_name_en,
-           func_calc_univ_up(univ_name_en, univ_name_en)   up,
-           (SELECT id FROM gi_country C WHERE C.name_cn = A.region_cn)    country_id,
-           0                           AS                                 outdated,
-           '2022.06.13处理QS世界大学排名数据时添加' AS                         remark
-    FROM ub_details_raw.qs_world_ranking_20220609 A)
+           func_calc_univ_up(univ_name_en, univ_name_en)               up,
+           (SELECT id FROM gi_country C WHERE C.name_cn = A.region_cn) country_id,
+           0                           AS                              outdated,
+           '2022.06.13处理QS世界大学排名数据时添加' AS                              remark
+    FROM ub_details_raw.qs_world_univ_ranking_20220609 A)
 SELECT *
 FROM ranking
 WHERE univ_id IS NULL;
-
-
 
 
 -- rr_qs_wur_rank
@@ -399,15 +380,15 @@ WITH ranking AS (
                     WHERE A.univ_code = B.code
                     ORDER BY B.outdated = 0 DESC,
                              B.outdated DESC
-                    LIMIT 1)           AS univ_id,
+                    LIMIT 1)                    AS univ_id,
                    univ_code,
-                   IF(score = '-',NULL,score) AS score,
+                   IF(score = '-', NULL, score) AS score,
                    ranking,
-                   rank_region         AS rank_country,
+                   rank_region                  AS rank_country,
                    score_precise,
                    ranking_precise,
-                   rank_region_precise AS rank_country_precise
-    FROM ub_details_raw.qs_world_ranking_20220609 A)
+                   rank_region_precise          AS rank_country_precise
+    FROM ub_details_raw.qs_world_univ_ranking_20220609 A)
 SELECT *
 FROM ranking
 WHERE 1;
@@ -428,7 +409,8 @@ WITH score AS (
         univ_code,
         academic_reputation      AS score,
         academic_reputation_rank AS ranking
-    FROM ub_details_raw.qs_world_ranking_20220609 A UNION ALL
+    FROM ub_details_raw.qs_world_univ_ranking_20220609 A
+    UNION ALL
 
     SELECT /*id, */
         yr,
@@ -442,77 +424,83 @@ WITH score AS (
         univ_code,
         employer_reputation      AS score,
         employer_reputation_rank AS ranking
-    FROM ub_details_raw.qs_world_ranking_20220609 A UNION ALL
+    FROM ub_details_raw.qs_world_univ_ranking_20220609 A
+    UNION ALL
 
     SELECT /*id, */
         yr,
-        51                       AS ind_id,
+        51                         AS ind_id,
         (SELECT B.id
          FROM univ_ranking_dev.univ B
          WHERE A.univ_code = B.code
          ORDER BY B.outdated = 0 DESC,
                   B.outdated DESC
-         LIMIT 1)                AS univ_id,
+         LIMIT 1)                  AS univ_id,
         univ_code,
         faculty_student_ratio      AS score,
         faculty_student_ratio_rank AS ranking
-    FROM ub_details_raw.qs_world_ranking_20220609 A UNION ALL
+    FROM ub_details_raw.qs_world_univ_ranking_20220609 A
+    UNION ALL
 
     SELECT /*id, */
         yr,
-        52                       AS ind_id,
+        52                         AS ind_id,
         (SELECT B.id
          FROM univ_ranking_dev.univ B
          WHERE A.univ_code = B.code
          ORDER BY B.outdated = 0 DESC,
                   B.outdated DESC
-         LIMIT 1)                AS univ_id,
+         LIMIT 1)                  AS univ_id,
         univ_code,
         citations_per_faculty      AS score,
         citations_per_faculty_rank AS ranking
-    FROM ub_details_raw.qs_world_ranking_20220609 A UNION ALL
+    FROM ub_details_raw.qs_world_univ_ranking_20220609 A
+    UNION ALL
 
     SELECT /*id, */
         yr,
-        53                       AS ind_id,
+        53                               AS ind_id,
         (SELECT B.id
          FROM univ_ranking_dev.univ B
          WHERE A.univ_code = B.code
          ORDER BY B.outdated = 0 DESC,
                   B.outdated DESC
-         LIMIT 1)                AS univ_id,
+         LIMIT 1)                        AS univ_id,
         univ_code,
         international_faculty_ratio      AS score,
         international_faculty_ratio_rank AS ranking
-    FROM ub_details_raw.qs_world_ranking_20220609 A UNION ALL
+    FROM ub_details_raw.qs_world_univ_ranking_20220609 A
+    UNION ALL
 
     SELECT /*id, */
         yr,
-        54                       AS ind_id,
+        54                                AS ind_id,
         (SELECT B.id
          FROM univ_ranking_dev.univ B
          WHERE A.univ_code = B.code
          ORDER BY B.outdated = 0 DESC,
                   B.outdated DESC
-         LIMIT 1)                AS univ_id,
+         LIMIT 1)                         AS univ_id,
         univ_code,
         international_students_ratio      AS score,
         international_students_ratio_rank AS ranking
-    FROM ub_details_raw.qs_world_ranking_20220609 A UNION ALL
+    FROM ub_details_raw.qs_world_univ_ranking_20220609 A
+    UNION ALL
 
     SELECT /*id, */
         yr,
-        55                       AS ind_id,
+        55                                  AS ind_id,
         (SELECT B.id
          FROM univ_ranking_dev.univ B
          WHERE A.univ_code = B.code
          ORDER BY B.outdated = 0 DESC,
                   B.outdated DESC
-         LIMIT 1)                AS univ_id,
+         LIMIT 1)                           AS univ_id,
         univ_code,
         international_research_network      AS score,
         international_research_network_rank AS ranking
-    FROM ub_details_raw.qs_world_ranking_20220609 A UNION ALL
+    FROM ub_details_raw.qs_world_univ_ranking_20220609 A
+    UNION ALL
 
     SELECT /*id, */
         yr,
@@ -526,40 +514,47 @@ WITH score AS (
         univ_code,
         employment_outcomes      AS score,
         employment_outcomes_rank AS ranking
-    FROM ub_details_raw.qs_world_ranking_20220609 A
-
-) SELECT * FROM score;
+    FROM ub_details_raw.qs_world_univ_ranking_20220609 A
+)
+SELECT *
+FROM score;
 
 
 -- 更新QS世界大学历史版本指标名称:rr_qs_wur_indicator
-SELECT * FROM rr_qs_wur_indicator WHERE name_cn = '师均被引次数';
-UPDATE rr_qs_wur_indicator SET name_cn = '单位教员论文引文数'
+SELECT *
+FROM rr_qs_wur_indicator
+WHERE name_cn = '师均被引次数';
+UPDATE rr_qs_wur_indicator
+SET name_cn = '单位教员论文引文数'
 WHERE name_cn = '师均被引次数';
 
 -- 版本表信息更新：dataset_version
-SELECT * FROM dataset_version WHERE name_cn = 'QS世界大学排名';
-
+SELECT *
+FROM dataset_version
+WHERE name_cn = 'QS世界大学排名';
 
 
 -- 老360平台QS世界大学排名数据：
 WITH QS_360 AS (
-SELECT yr rank_year,
-       issue_time,
-       '全球排名' rank_type,
-       'F002' rank_id,
-       univ_code rank_school_code,
-                   (SELECT B._code_old
-                    FROM univ_ranking_dev.univ_cn B
-                    WHERE A.univ_code = B.code
-                    ORDER BY B.outdated = 0 DESC,
-                             B.outdated DESC
-                    LIMIT 1)  school_code,
-       ranking issue_rank_val,
-       ranking_precise rank_val,
-       rank_region cn_issue_rank_val,
-       rank_region_precise cn_rank_val
-FROM ub_details_raw.qs_world_ranking_20220609 A)
-SELECT * FROM QS_360 WHERE school_code IS NOT NULL;
+    SELECT yr                  rank_year,
+           issue_time,
+           '全球排名'              rank_type,
+           'F002'              rank_id,
+           univ_code           rank_school_code,
+           (SELECT B._code_old
+            FROM univ_ranking_dev.univ_cn B
+            WHERE A.univ_code = B.code
+            ORDER BY B.outdated = 0 DESC,
+                     B.outdated DESC
+            LIMIT 1)           school_code,
+           ranking             issue_rank_val,
+           ranking_precise     rank_val,
+           rank_region         cn_issue_rank_val,
+           rank_region_precise cn_rank_val
+    FROM ub_details_raw.qs_world_univ_ranking_20220609 A)
+SELECT *
+FROM QS_360
+WHERE school_code IS NOT NULL;
 
 
 WITH qs_ind_360 AS (
@@ -589,8 +584,9 @@ WITH qs_ind_360 AS (
                 WHEN ind_id = 56 THEN '就业成果'
                END
                )        evaluate_name,
-           score evaluate_score
-    FROM rr_qs_wur_ind_rank A WHERE yr = 2023)
+           score        evaluate_score
+    FROM rr_qs_wur_ind_rank A
+    WHERE yr = 2023)
 SELECT *
 FROM qs_ind_360
 WHERE school_code IS NOT NULL;
@@ -598,22 +594,22 @@ WHERE school_code IS NOT NULL;
 
 # 更新高校状态指标数据库国际对比页面
 WITH data_detail_rank_list_world AS (
-    SELECT /*id, */yr real_year,
-           yr data_year,
-           univ_code institutionCode,
-           univ_name_cn institutionName,
-           region_cn country,
-           2 indicatorCode,
-           ranking indicatorValue
-    FROM ub_details_raw.qs_world_ranking_20220609 A)
+    SELECT /*id, */yr           real_year,
+                   yr           data_year,
+                   univ_code    institutionCode,
+                   univ_name_cn institutionName,
+                   region_cn    country,
+                   2            indicatorCode,
+                   ranking      indicatorValue
+    FROM ub_details_raw.qs_world_univ_ranking_20220609 A)
 SELECT *
 FROM data_detail_rank_list_world;
 
 
 WITH gxztzbdb_qs_ind_360 AS (
-    SELECT yr    real_year,
-           yr    data_year,
-           '2'   indicatorCode,
+    SELECT yr        real_year,
+           yr        data_year,
+           '2'       indicatorCode,
            univ_code institutionCode,
            (CASE
                 WHEN ind_id = 49 THEN '学术声誉'
@@ -625,8 +621,8 @@ WITH gxztzbdb_qs_ind_360 AS (
                 WHEN ind_id = 55 THEN '国际研究网络'
                 WHEN ind_id = 56 THEN '就业成果'
                END
-               ) indicatorSubName,
-           score indicatorValue
+               )     indicatorSubName,
+           score     indicatorValue
     FROM rr_qs_wur_ind_rank A
     WHERE yr = 2023)
 SELECT *
@@ -634,27 +630,155 @@ FROM gxztzbdb_qs_ind_360;
 
 -- 指标查看页面：
 WITH QS_360 AS (
-SELECT yr data_year,
-       issue_time,
-       '全球排名' rank_type,
-       'F002' target_code,
-       univ_code rank_school_code,
-                   (SELECT B._code_old
-                    FROM univ_ranking_dev.univ_cn B
-                    WHERE A.univ_code = B.code
-                    ORDER BY B.outdated = 0 DESC,
-                             B.outdated DESC
-                    LIMIT 1)  institutionCode,
-       ranking issue_rank_val,
-       ranking_precise rank_val,
-       rank_region cn_issue_rank_val,
-       rank_region_precise cn_rank_val,
-       'F002' is_top,
-       IF((ranking_precise + 0) <= 500,'F002',NULL) is_top500,
-       IF((ranking_precise + 0) <= 200,'F002',NULL) is_top200,
-       IF((ranking_precise + 0) <= 100,'F002',NULL) is_top100
-FROM ub_details_raw.qs_world_ranking_20220609 A)
-SELECT * FROM QS_360 WHERE institutionCode IS NOT NULL;
+    SELECT yr                                             data_year,
+           issue_time,
+           '全球排名'                                         rank_type,
+           'F002'                                         target_code,
+           univ_code                                      rank_school_code,
+           (SELECT B._code_old
+            FROM univ_ranking_dev.univ_cn B
+            WHERE A.univ_code = B.code
+            ORDER BY B.outdated = 0 DESC,
+                     B.outdated DESC
+            LIMIT 1)                                      institutionCode,
+           ranking                                        issue_rank_val,
+           ranking_precise                                rank_val,
+           rank_region                                    cn_issue_rank_val,
+           rank_region_precise                            cn_rank_val,
+           'F002'                                         is_top,
+           IF((ranking_precise + 0) <= 500, 'F002', NULL) is_top500,
+           IF((ranking_precise + 0) <= 200, 'F002', NULL) is_top200,
+           IF((ranking_precise + 0) <= 100, 'F002', NULL) is_top100
+    FROM ub_details_raw.qs_world_univ_ranking_20220609 A)
+SELECT *
+FROM QS_360
+WHERE institutionCode IS NOT NULL;
+
+
+
+# 广州日报学科排名-360排名监测
+# rr_gzdsr_rank
+INSERT INTO rr_gzdsr_rank (/*id, */yr, subj_code, univ_id, univ_code, ranking, is_copy)
+SELECT /*id, */
+    yr,
+    subject_code AS subj_code,
+    (SELECT B.id
+     FROM univ_ranking_dev.univ B
+     WHERE A.univ_code = B.code
+     ORDER BY B.outdated = 0 DESC,
+              B.outdated DESC
+     LIMIT 1)    AS univ_id,
+    univ_code,
+    ranking,
+    0            AS is_copy
+FROM ub_details_raw.gdi_cn_subject_ranking_20220622 A
+WHERE yr = 2022
+ORDER BY subject_code, (ranking + 0);
+
+
+# rr_gzdsr_stats
+/*WITH gzdsr_stats AS (
+    SELECT yr,
+           (SELECT B.id
+            FROM univ_ranking_dev.univ B
+            WHERE A.univ_code = B.code
+            ORDER BY B.outdated = 0 DESC,
+                     B.outdated DESC
+            LIMIT 1)     AS univ_id,
+           univ_code,
+           'num_on_list' AS top,
+           COUNT(*)      AS num,
+           0             AS is_copy,
+           ranking
+    FROM ub_details_raw.gdi_cn_subject_ranking_20220622 A
+    GROUP BY univ_code
+    UNION ALL
+    SELECT yr,
+           (SELECT B.id
+            FROM univ_ranking_dev.univ B
+            WHERE A.univ_code = B.code
+            ORDER BY B.outdated = 0 DESC,
+                     B.outdated DESC
+            LIMIT 1)  AS univ_id,
+           univ_code,
+           'num_top5' AS top,
+           COUNT(*)   AS num,
+           0          AS is_copy,
+           ranking
+    FROM ub_details_raw.gdi_cn_subject_ranking_20220622 A
+    WHERE (ranking + 0) <= 5
+    GROUP BY univ_code
+    UNION ALL
+    SELECT yr,
+           (SELECT B.id
+            FROM univ_ranking_dev.univ B
+            WHERE A.univ_code = B.code
+            ORDER BY B.outdated = 0 DESC,
+                     B.outdated DESC
+            LIMIT 1)   AS univ_id,
+           univ_code,
+           'num_top25' AS top,
+           COUNT(*)    AS num,
+           0           AS is_copy,
+           ranking
+    FROM ub_details_raw.gdi_cn_subject_ranking_20220622 A
+    WHERE (ranking + 0) <= 25
+    GROUP BY univ_code)
+SELECT yr,
+       univ_id,
+       univ_code,
+       MAX(CASE WHEN top = 'num_on_list' THEN num ELSE 0 END) AS num_on_list,
+       MAX(CASE WHEN top = 'num_top5' THEN num ELSE 0 END)    AS num_top5,
+       MAX(CASE WHEN top = 'num_top25' THEN num ELSE 0 END)   AS num_top25,
+       is_copy
+FROM gzdsr_stats
+GROUP BY univ_code
+;*/
+INSERT INTO rr_gzdsr_stats (yr, univ_id, univ_code, num_on_list, num_top5, num_top25, is_copy)
+WITH base AS (
+    SELECT yr,
+           univ_code,
+           CASE WHEN (ranking + 0) < 10000 THEN 1 ELSE NULL END AS 'top_all',
+           CASE WHEN (ranking + 0) <= 25 THEN 1 ELSE NULL END   AS 'top_25',
+           CASE WHEN (ranking + 0) <= 5 THEN 1 ELSE NULL END    AS 'top_5'
+    FROM ub_details_raw.gdi_cn_subject_ranking_20220622
+    WHERE yr = 2022
+)
+SELECT yr,
+       (SELECT B.id
+        FROM univ_ranking_dev.univ B
+        WHERE A.univ_code = B.code
+        ORDER BY B.outdated = 0 DESC,
+                 B.outdated DESC
+        LIMIT 1) AS   univ_id,
+       univ_code,
+       COUNT(top_all) num_on_list,
+       COUNT(top_5)   num_top5,
+       COUNT(top_25)  num_top25,
+       0              is_copy
+FROM base A
+GROUP BY univ_code;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

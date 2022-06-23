@@ -2,7 +2,7 @@
 
 -- 注： 更新 @Date_import 后执行
 USE ub_details_raw;
-SET @Date_import = '2022-06-22';
+SET @Date_import = '2022-06-23';
 
 INSERT INTO ub_details_0429.var_detail ( dtl_id, revision, var_id, var_code, source_id, ver_no, univ_code, lev, val,
                                          agg_from, created_by )
