@@ -164,16 +164,17 @@ WHERE I.r_ver_no = @rVerNo
 
 # 数据更新
 SET FOREIGN_KEY_CHECKS = 0;
-DELETE
+
+/*DELETE
 FROM derived_ind_score_2022
 WHERE r_ver_no = @rVerNo
   AND r_leaf_id IN (@rLeafId_0, @rLeafId_1, @rLeafId_2, @rLeafId_3, @rLeafId_4);
 DELETE
 FROM derived_ranking_list
 WHERE r_ver_no = @rVerNo
-  AND r_leaf_id IN (@rLeafId_0, @rLeafId_1, @rLeafId_2, @rLeafId_3, @rLeafId_4);
+  AND r_leaf_id IN (@rLeafId_0, @rLeafId_1, @rLeafId_2, @rLeafId_3, @rLeafId_4);*/
+
 # 插入指标得分与排名-专项监测
-# TRUNCATE TABLE derived_ind_score_2022;
 INSERT INTO derived_ind_score_2022(r_ver_no,
                                    r_leaf_id,
                                    ind_id,
@@ -237,7 +238,6 @@ WHERE r_ver_no = @rVerNo
 
 
 # 插入指标得分与排名-质量监测
-
 INSERT INTO derived_ind_score_2022(r_ver_no,
                                    r_leaf_id,
                                    ind_id,
