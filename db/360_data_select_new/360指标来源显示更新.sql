@@ -75,20 +75,20 @@ WHERE A.ind_code IN (SELECT C.code FROM ub_details_raw._generalsources_new_name 
 
 
 UPDATE indicator_latest
-SET val = JSON_SET(val, '$.resetEffSrcIds', '88')
+SET val = JSON_SET(val, '$.resetEffSrcIds', true)
 WHERE level = 3
   AND code IN (SELECT C.code FROM ub_details_raw._generalsources_new_name C WHERE C.generalSources RLIKE '见指标');
 
 UPDATE indicator
-SET val = JSON_SET(val, '$.resetEffSrcIds', '88')
+SET val = JSON_SET(val, '$.resetEffSrcIds', true)
 WHERE level = 3
   AND code IN (SELECT C.code FROM ub_details_raw._generalsources_new_name C WHERE C.generalSources RLIKE '见指标');
 
 
-UPDATE indicator SET val = JSON_SET(val, '$.resetEffSrcIds', '88')
+UPDATE indicator SET val = JSON_SET(val, '$.resetEffSrcIds', true)
 WHERE name = '模范先进学生（生均）';
 
-UPDATE indicator SET val = JSON_SET(val, '$.resetEffSrcIds', '88')
+UPDATE indicator SET val = JSON_SET(val, '$.resetEffSrcIds', true)
 WHERE name = '学术人才（师均）';
 
 INSERT INTO c_ind_source (_id, ind_code, src_id, priority, name, abbr, _old_src_id, _new_src_id)

@@ -40,7 +40,7 @@ SELECT 0                                                     revision,
        202207                                                _eversions_,
        202207                                                _r_ver_no,
        -2                                                    created_by
-FROM ub_details_raw.provincial_awards_20220613 A
+FROM ub_details_raw.provincial_awards_data_20220613 A
 WHERE 1;
 
 -- 省级一流本科课程
@@ -128,7 +128,7 @@ SELECT 0           revision,
        NULL        updated_by,
        NULL        deleted_at,
        NULL        deleted_by
-FROM ub_details_raw.first_major_data_20220613
+FROM ub_details_raw.national_first_major_data_20220613
 WHERE var_code = 'pccourse';
 
 -- 国家级一流本科专业
@@ -170,6 +170,58 @@ SELECT 0           revision,
        NULL        updated_by,
        NULL        deleted_at,
        NULL        deleted_by
-FROM ub_details_raw.first_major_data_20220613
+FROM ub_details_raw.national_first_major_data_20220613
 WHERE var_code = 'ben1';
 
+
+
+# 2022年06月23日新增：五四青年奖
+INSERT INTO var_detail (dtl_id, revision, var_id, var_code, source_id, ver_no, univ_code, lev, val, detail,
+                        subject_code, rel_code, agg_from, _eversions_, _r_ver_no, created_at, created_by,
+                        updated_at, updated_by, deleted_at, deleted_by)
+SELECT NULL         dtl_id,
+       0            revision,
+       43           var_id,
+       'add1055'    var_code,
+       9            source_id,
+       elected_year ver_no,
+       univ_code,
+       0            lev,
+       1            val,
+       JSON_OBJECT(
+               'remark1', NULL,
+               'remark2', NULL,
+               'born_year', NULL,
+               'dead_year', NULL,
+               'effective', '1',
+               'award_level', NULL,
+               'talent_name', talent_name,
+               'current_code', NULL,
+               'current_name', NULL,
+               'elected_code', univ_code,
+               'elected_name', elected_name,
+               'elected_year', elected_year,
+               'project_name', NULL,
+               'project_money', 1.0
+           )
+                    detail,
+       ''           subject_code,
+       talent_code  rel_code,
+       0            agg_from,
+       202207       _eversions_,
+       202207       _r_ver_no,
+       NOW()        create_time,
+       -2           created_by,
+       NOW()        updated_at,
+       NULL         updated_by,
+       NULL         deleted_at,
+       NULL         deleted_by
+FROM ub_details_raw.var_code_add1055_20220623
+WHERE 1;
+
+
+UPDATE ub_ranking_dev.indicator_latest SET detail = JSON_SET(detail,'$.availVer','2014-2021','$.targetVer','2017-2021')
+WHERE  `name` rlike '中文期刊论文';
+
+UPDATE ub_ranking_dev.indicator SET detail = JSON_SET(detail,'$.availVer','2014-2021','$.targetVer','2017-2021')
+WHERE  `name` rlike '中文期刊论文' AND r_ver_no = 202207;
