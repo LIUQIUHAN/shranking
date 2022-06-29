@@ -13,7 +13,7 @@ UPDATE user_360 SET update_time = '2022-05-17 17:22:41' WHERE update_time IS NUL
 
 # 用户账号
 -- SELECT * FROM user a where exists (SELECT * from user_360 b where a.email =b.email);
-TRUNCATE TABLE user;
+#  TRUNCATE TABLE user;
 INSERT INTO user ( user_name, login_name, email, mobile, role_id, user_group, univ_code, name, sex, department,
                    position, title, remark, frozen_at, password_md5, password_salt, password_hash, sms_code,
                    sms_code_upd_at, sms_code_tried, wx_union_id, qq_open_id, wb_uid, created_at, created_by,
@@ -70,7 +70,7 @@ WHERE 1;
 # 用户标杆
 -- ALTER TABLE subscription DROP COLUMN remake;
 -- ALTER TABLE subscription ADD COLUMN remake VARCHAR(50) COMMENT'用户邮箱' NULL AFTER product_code; -- 用来匹配created_by
-TRUNCATE TABLE subscription;
+#  TRUNCATE TABLE subscription;
 INSERT INTO subscription ( product_code, remake, univ_code, perm, start_date, expire_date, managed_by, created_at,
                            created_by, updated_at, updated_by, deleted_at, deleted_by )
 SELECT 'ub'                                  product_code,
@@ -126,7 +126,7 @@ WHERE email NOT IN ('chao.zhu@shanghairanking.com',
 --  AND email NOT IN ( SELECT email FROM src_user )
   AND email IS NOT NULL;
 
-UPDATE user_subs a JOIN user b ON a.remake1 = b.email
+UPDATE user_subs a JOIN user b ON a.remark1 = b.email
 SET a.user_id    = b.id,
     a.created_by = b.created_by
 WHERE user_id = -99999;
@@ -135,18 +135,18 @@ WHERE user_id = -99999;
 WITH c AS ( SELECT e.id AS id, a.email AS aemail, b.email AS bemail
             FROM user_360          a
                  JOIN user_360     b ON a.id = b.create_id_user
-                 JOIN subscription e ON a.email = e.remake )
-UPDATE user_subs f JOIN c ON f.remake1 = c.bemail
+                 JOIN subscription e ON a.email = e.remark )
+UPDATE user_subs f JOIN c ON f.remark1 = c.bemail
 SET f.subs_id = c.id
 WHERE 1;
 
-UPDATE user_subs a JOIN subscription b ON a.remake1 = b.remake
+UPDATE user_subs a JOIN subscription b ON a.remark1 = b.remark
 SET a.subs_id = b.id
 WHERE a.subs_id = -99999;
 
 
 # 添加普通账户（非管理员账号）的页面权限
-TRUNCATE TABLE ub_product.user_menu;
+# TRUNCATE TABLE ub_product.user_menu;
 INSERT INTO ub_product.user_menu( user_id, menus, created_at, created_by, updated_at, updated_by, deleted_at,
                                   deleted_by )
 SELECT id                                               user_id,

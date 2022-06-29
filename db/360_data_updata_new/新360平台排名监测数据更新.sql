@@ -761,18 +761,178 @@ GROUP BY univ_code;
 
 
 
+# GRAS世界一流学科排名：
+# 1.基础数据入库（略）；
+# 2.更新基础数据表中univ_id：
+UPDATE univ_ranking_raw.raw_gras_sr_details_20220628 A
+SET A.univ_id = (SELECT B.id
+                 FROM univ_ranking_dev.univ B
+                 WHERE A.univ_code = B.code
+                 ORDER BY B.outdated = 0 DESC,
+                          B.outdated DESC
+                 LIMIT 1)
+WHERE yr = 2022;
+
+UPDATE univ_ranking_raw.raw_gras_sr_stats_20220628 A
+SET A.univ_id = (SELECT B.id
+                 FROM univ_ranking_dev.univ B
+                 WHERE A.univ_code = B.code
+                 ORDER BY B.outdated = 0 DESC,
+                          B.outdated DESC
+                 LIMIT 1)
+WHERE yr = 2022;
+
+# 检查是否需要补充univ数据：
+SELECT *
+FROM univ_ranking_raw.raw_gras_sr_details_20220628
+WHERE univ_id IS NULL
+GROUP BY univ_code; -- 需要
+SELECT *
+FROM univ_ranking_raw.raw_gras_sr_stats_20220628
+WHERE univ_id IS NULL
+GROUP BY univ_code; -- 无
+
+INSERT INTO univ (id, code, name_cn, name_en, up, country_id,
+                  outdated, remark)
+SELECT NULL                                                                   id,
+       univ_code                                                              code,
+       univ_name_cn                                                           name_cn,
+       univ_name_en                                                           name_en,
+       func_calc_univ_up(univ_name_en, univ_name_en)                          up,
+       (SELECT id FROM gi_country C WHERE C.name_cn = A.country_or_region_cn) country_id,
+       0                                                                      outdated,
+       '2022.06.28处理gras世界一流学科排名时添加' AS                                       remark
+FROM univ_ranking_raw.raw_gras_sr_details_20220628 A
+WHERE univ_id IS NULL;
 
 
+# 1.指标信息（略）
+# 2.学科信息：gras_subject
+INSERT INTO gras_subject (id, yr, category_code, code, name_cn, name_en, weights, num_univ_pub)
+SELECT NULL                                                                                     id,
+       yr,
+       (SELECT category_code FROM gras_subject B WHERE A.subject_code = B.code AND B.yr = 2021) category_code,
+       subject_code                                                                             code,
+       subject_name_cn                                                                          name_cn,
+       subject_name_en                                                                          name_en,
+       NULL                                                                                     weights,
+       COUNT(*)                                                                                 num_univ_pub
+FROM univ_ranking_raw.raw_gras_sr_details_20220628 A
+GROUP BY subject_code, yr;
 
+# 3.统计值数据：gras_stats
+INSERT INTO gras_stats (/*id, */yr, univ_id, univ_code, ranking, rank_country, num_on_list, pct_on_list, num_top10,
+                                num_top50, num_top100, num_top200, num_top500, ord_num_top)
+WITH TOP AS (
+    SELECT yr,
+           univ_code,
+           CASE WHEN type_n = '前10' THEN 1 ELSE NULL END  AS 'num_top_10',
+           CASE WHEN type_n = '前50' THEN 1 ELSE NULL END  AS 'num_top_50',
+           CASE WHEN type_n = '前100' THEN 1 ELSE NULL END AS 'num_top_100',
+           CASE WHEN type_n = '前200' THEN 1 ELSE NULL END AS 'num_top_200',
+           CASE WHEN type_n = '前500' THEN 1 ELSE NULL END AS 'num_top_500'
+    FROM univ_ranking_raw.raw_gras_sr_details_20220628 A)
+   , TOP_NUM AS (
+    SELECT yr,
+           univ_code,
+           COUNT(num_top_10)                                            AS num_top_10,
+           (COUNT(num_top_50) + COUNT(num_top_10))                      AS num_top_50,
+           (COUNT(num_top_100) + COUNT(num_top_50) + COUNT(num_top_10)) AS num_top_100,
+           (COUNT(num_top_200) + COUNT(num_top_100) + COUNT(num_top_50) +
+            COUNT(num_top_10))                                          AS num_top_200,
+           (COUNT(num_top_500) + COUNT(num_top_200) + COUNT(num_top_100) + COUNT(num_top_50) +
+            COUNT(num_top_10))                                          AS num_top_500
+    FROM TOP
+    GROUP BY univ_code, yr)
+SELECT A.yr,
+       A.univ_id,
+       A.univ_code,
+       A.rank_world,
+       A.rank_region,
+       A.on_list_all,
+       A.proportion,
+       B.num_top_10,
+       B.num_top_50,
+       B.num_top_100,
+       B.num_top_200,
+       B.num_top_500,
+       RANK() OVER (ORDER BY B.num_top_10 DESC, B.num_top_50 DESC, B.num_top_100 DESC, B.num_top_200 DESC, B.num_top_500 DESC,
+           (SELECT CONVERT(name_cn USING gbk)
+            FROM univ_cn uc
+            WHERE NOT outdated
+              AND uc.code = B.univ_code)) AS ord_no
+FROM univ_ranking_raw.raw_gras_sr_stats_20220628 A
+         JOIN TOP_NUM B USING (yr, univ_code)
+WHERE A.yr = 2022
+;
 
+# 4.学科排名数据：gras_rank
+INSERT INTO gras_rank (yr, subj_code, univ_id, univ_code, score, ranking, ranking___precise, rank_country,
+                       rank_country___precise, rank_top_n, order_priority)
+SELECT yr,
+       subject_code                              AS subj_code,
+       univ_id,
+       univ_code,
+       IF(score_issued = '', NULL, score_issued) AS score,
+       rank_issued                               AS ranking,
+       rank_precise                              AS ranking___precise,
+       rank_region_issued                        AS rank_country,
+       rank_region_percise                       AS rank_country___precise,
+       SUBSTRING_INDEX(type_n, '前', -1)          AS rank_top_n,
+       SUBSTRING_INDEX(rank_issued, '-', -1)     AS order_priority
+FROM univ_ranking_raw.raw_gras_sr_details_20220628
+WHERE yr = 2022;
 
-
-
-
-
-
-
-
+# 5.指标信息：gras_indicator（略）
+# 6.指标排名数据
+INSERT INTO gras_ind_score (/*id, */yr, subj_code, ind_id, univ_id, univ_code, score)
+WITH IND_SCORE AS (
+    SELECT yr,
+           subject_code                        AS subj_code,
+           26                                  AS ind_id,
+           univ_id,
+           univ_code,
+           IF(Q1_Score = 'NA', NULL, Q1_Score) AS score
+    FROM univ_ranking_raw.raw_gras_sr_details_20220628
+    WHERE yr = 2022
+    UNION ALL
+    SELECT yr,
+           subject_code                            AS subj_code,
+           27                                      AS ind_id,
+           univ_id,
+           univ_code,
+           IF(CNCI_Score = 'NA', NULL, CNCI_Score) AS score
+    FROM univ_ranking_raw.raw_gras_sr_details_20220628
+    WHERE yr = 2022
+    UNION ALL
+    SELECT yr,
+           subject_code                        AS subj_code,
+           28                                  AS ind_id,
+           univ_id,
+           univ_code,
+           IF(IC_Score = 'NA', NULL, IC_Score) AS score
+    FROM univ_ranking_raw.raw_gras_sr_details_20220628
+    WHERE yr = 2022
+    UNION ALL
+    SELECT yr,
+           subject_code                          AS subj_code,
+           29                                    AS ind_id,
+           univ_id,
+           univ_code,
+           IF(Top_Score = 'NA', NULL, Top_Score) AS score
+    FROM univ_ranking_raw.raw_gras_sr_details_20220628
+    WHERE yr = 2022
+    UNION ALL
+    SELECT yr,
+           subject_code                              AS subj_code,
+           30                                        AS ind_id,
+           univ_id,
+           univ_code,
+           IF(Award_Score = 'NA', NULL, Award_Score) AS score
+    FROM univ_ranking_raw.raw_gras_sr_details_20220628
+    WHERE yr = 2022)
+SELECT *
+FROM IND_SCORE;
 
 
 
