@@ -116,6 +116,6 @@ WHERE ind_code IN (SELECT C.code FROM ub_details_raw._generalsources_new_name C 
   AND r_ver_no = 202207;
 
 
-
-
+SELECT  * FROM indicator_latest WHERE level = 3 AND val ->> '$.resetEffSrcIds' = 'true';
+SELECT  * FROM indicator WHERE level = 3 AND val ->> '$.resetEffSrcIds' = 'true' and r_ver_no = 202207;
 

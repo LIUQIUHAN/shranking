@@ -1,4 +1,5 @@
 USE univ_ranking_dev;
+
 # 1.1 导入武书连排名数据
 INSERT INTO rr_qjp_rank (yr, univ_id, univ_code, province_code, score, ranking, rank_province)
 SELECT yr, 0 univ_id, univ_code, 0 province_code, score, ranking, rank_province
@@ -761,10 +762,15 @@ GROUP BY univ_code;
 
 
 
+
+
+
+
+
 # GRAS世界一流学科排名：
 # 1.基础数据入库（略）；
 # 2.更新基础数据表中univ_id：
-UPDATE univ_ranking_raw.raw_gras_sr_details_20220628 A
+UPDATE univ_ranking_raw.raw_gras_sr_details_20220704 A
 SET A.univ_id = (SELECT B.id
                  FROM univ_ranking_dev.univ B
                  WHERE A.univ_code = B.code
@@ -773,7 +779,7 @@ SET A.univ_id = (SELECT B.id
                  LIMIT 1)
 WHERE yr = 2022;
 
-UPDATE univ_ranking_raw.raw_gras_sr_stats_20220628 A
+UPDATE univ_ranking_raw.raw_gras_sr_stats_20220704 A
 SET A.univ_id = (SELECT B.id
                  FROM univ_ranking_dev.univ B
                  WHERE A.univ_code = B.code
@@ -784,11 +790,11 @@ WHERE yr = 2022;
 
 # 检查是否需要补充univ数据：
 SELECT *
-FROM univ_ranking_raw.raw_gras_sr_details_20220628
+FROM univ_ranking_raw.raw_gras_sr_details_20220704
 WHERE univ_id IS NULL
 GROUP BY univ_code; -- 需要
 SELECT *
-FROM univ_ranking_raw.raw_gras_sr_stats_20220628
+FROM univ_ranking_raw.raw_gras_sr_stats_20220704
 WHERE univ_id IS NULL
 GROUP BY univ_code; -- 无
 
@@ -802,12 +808,14 @@ SELECT NULL                                                                   id
        (SELECT id FROM gi_country C WHERE C.name_cn = A.country_or_region_cn) country_id,
        0                                                                      outdated,
        '2022.06.28处理gras世界一流学科排名时添加' AS                                       remark
-FROM univ_ranking_raw.raw_gras_sr_details_20220628 A
+FROM univ_ranking_raw.raw_gras_sr_details_20220704 A
 WHERE univ_id IS NULL;
 
 
 # 1.指标信息（略）
 # 2.学科信息：gras_subject
+DELETE FROM gras_subject WHERE yr = 2022;
+
 INSERT INTO gras_subject (id, yr, category_code, code, name_cn, name_en, weights, num_univ_pub)
 SELECT NULL                                                                                     id,
        yr,
@@ -817,10 +825,12 @@ SELECT NULL                                                                     
        subject_name_en                                                                          name_en,
        NULL                                                                                     weights,
        COUNT(*)                                                                                 num_univ_pub
-FROM univ_ranking_raw.raw_gras_sr_details_20220628 A
+FROM univ_ranking_raw.raw_gras_sr_details_20220704 A
 GROUP BY subject_code, yr;
 
 # 3.统计值数据：gras_stats
+DELETE FROM gras_stats WHERE yr = 2022;
+
 INSERT INTO gras_stats (/*id, */yr, univ_id, univ_code, ranking, rank_country, num_on_list, pct_on_list, num_top10,
                                 num_top50, num_top100, num_top200, num_top500, ord_num_top)
 WITH TOP AS (
@@ -831,7 +841,7 @@ WITH TOP AS (
            CASE WHEN type_n = '前100' THEN 1 ELSE NULL END AS 'num_top_100',
            CASE WHEN type_n = '前200' THEN 1 ELSE NULL END AS 'num_top_200',
            CASE WHEN type_n = '前500' THEN 1 ELSE NULL END AS 'num_top_500'
-    FROM univ_ranking_raw.raw_gras_sr_details_20220628 A)
+    FROM univ_ranking_raw.raw_gras_sr_details_20220704 A)
    , TOP_NUM AS (
     SELECT yr,
            univ_code,
@@ -861,12 +871,14 @@ SELECT A.yr,
             FROM univ_cn uc
             WHERE NOT outdated
               AND uc.code = B.univ_code)) AS ord_no
-FROM univ_ranking_raw.raw_gras_sr_stats_20220628 A
+FROM univ_ranking_raw.raw_gras_sr_stats_20220704 A
          JOIN TOP_NUM B USING (yr, univ_code)
 WHERE A.yr = 2022
 ;
 
 # 4.学科排名数据：gras_rank
+DELETE FROM gras_rank WHERE yr = 2022;
+
 INSERT INTO gras_rank (yr, subj_code, univ_id, univ_code, score, ranking, ranking___precise, rank_country,
                        rank_country___precise, rank_top_n, order_priority)
 SELECT yr,
@@ -880,11 +892,13 @@ SELECT yr,
        rank_region_percise                       AS rank_country___precise,
        SUBSTRING_INDEX(type_n, '前', -1)          AS rank_top_n,
        SUBSTRING_INDEX(rank_issued, '-', -1)     AS order_priority
-FROM univ_ranking_raw.raw_gras_sr_details_20220628
+FROM univ_ranking_raw.raw_gras_sr_details_20220704
 WHERE yr = 2022;
 
 # 5.指标信息：gras_indicator（略）
 # 6.指标排名数据
+DELETE FROM gras_ind_score WHERE yr = 2022;
+
 INSERT INTO gras_ind_score (/*id, */yr, subj_code, ind_id, univ_id, univ_code, score)
 WITH IND_SCORE AS (
     SELECT yr,
@@ -893,7 +907,7 @@ WITH IND_SCORE AS (
            univ_id,
            univ_code,
            IF(Q1_Score = 'NA', NULL, Q1_Score) AS score
-    FROM univ_ranking_raw.raw_gras_sr_details_20220628
+    FROM univ_ranking_raw.raw_gras_sr_details_20220704
     WHERE yr = 2022
     UNION ALL
     SELECT yr,
@@ -902,7 +916,7 @@ WITH IND_SCORE AS (
            univ_id,
            univ_code,
            IF(CNCI_Score = 'NA', NULL, CNCI_Score) AS score
-    FROM univ_ranking_raw.raw_gras_sr_details_20220628
+    FROM univ_ranking_raw.raw_gras_sr_details_20220704
     WHERE yr = 2022
     UNION ALL
     SELECT yr,
@@ -911,7 +925,7 @@ WITH IND_SCORE AS (
            univ_id,
            univ_code,
            IF(IC_Score = 'NA', NULL, IC_Score) AS score
-    FROM univ_ranking_raw.raw_gras_sr_details_20220628
+    FROM univ_ranking_raw.raw_gras_sr_details_20220704
     WHERE yr = 2022
     UNION ALL
     SELECT yr,
@@ -920,7 +934,7 @@ WITH IND_SCORE AS (
            univ_id,
            univ_code,
            IF(Top_Score = 'NA', NULL, Top_Score) AS score
-    FROM univ_ranking_raw.raw_gras_sr_details_20220628
+    FROM univ_ranking_raw.raw_gras_sr_details_20220704
     WHERE yr = 2022
     UNION ALL
     SELECT yr,
@@ -929,10 +943,341 @@ WITH IND_SCORE AS (
            univ_id,
            univ_code,
            IF(Award_Score = 'NA', NULL, Award_Score) AS score
-    FROM univ_ranking_raw.raw_gras_sr_details_20220628
+    FROM univ_ranking_raw.raw_gras_sr_details_20220704
     WHERE yr = 2022)
 SELECT *
 FROM IND_SCORE;
+
+# 7.dataset_subj_level、dataset_type、dataset_version
+# 8.rk_dataset_univ_report、dataset_univ_report
+DELETE FROM rk_dataset_univ_report WHERE ver_no = 2022;
+
+INSERT INTO rk_dataset_univ_report (dataset_id, ver_no, univ_id, univ_code, univ_cn_id, file_dir, file_size, file_hash,
+                                    report_status, uploaded_at, updated_at, updated_by, copy_from)
+SELECT 2                dataset_id,
+       yr               ver_no,
+       univ_id,
+       univ_code,
+       (SELECT B.id
+        FROM univ_ranking_dev.univ_cn B
+        WHERE A.univ_code = B.code
+        ORDER BY B.outdated = 0 DESC,
+                 B.outdated DESC
+        LIMIT 1)        univ_cn_id,
+       '_RK/GRAS/2022/' file_dir,
+       NULL             file_size,
+       NULL             file_hash,
+       0                report_status,
+       NULL             uploaded_at,
+       NULL             updated_at,
+       NULL             updated_by,
+       NULL             copy_from
+FROM univ_ranking_raw.raw_gras_sr_stats_20220704 A
+WHERE yr = 2022;
+
+DELETE FROM dataset_univ_report WHERE ver_no = 2022;
+
+INSERT INTO dataset_univ_report (dataset_id, ver_no, univ_id, univ_code, univ_cn_id, file_dir, file_size, file_hash,
+                                 report_status, uploaded_at, updated_at, updated_by, copy_from)
+SELECT 2            dataset_id,
+       yr           ver_no,
+       univ_id,
+       univ_code,
+       (SELECT B.id
+        FROM univ_ranking_dev.univ_cn B
+        WHERE A.univ_code = B.code
+        ORDER BY B.outdated = 0 DESC,
+                 B.outdated DESC
+        LIMIT 1)    univ_cn_id,
+       'GRAS/2022/' file_dir,
+       NULL         file_size,
+       NULL         file_hash,
+       0            report_status,
+       NULL         uploaded_at,
+       NULL         updated_at,
+       NULL         updated_by,
+       NULL         copy_from
+FROM univ_ranking_raw.raw_gras_sr_stats_20220704 A
+WHERE yr = 2022;
+
+
+
+
+
+
+
+
+# 360平台-排名监测页面-国际大学排名需新增自然指数（Nature Index）排名和Scimago世界大学排名
+# 自然指数（Nature Index）排名
+USE univ_ranking_dev;
+# 指标表
+CREATE TABLE rr_nature_index_wur_indicator
+(
+    id      int AUTO_INCREMENT PRIMARY KEY COMMENT 'id',
+    yr      int           NOT NULL COMMENT '年份',
+    name_cn varchar(20)   NOT NULL COMMENT '指标名称(中文)',
+    name_en varchar(50)   NOT NULL COMMENT '指标名称(英文)',
+    weight  decimal(4, 3) NULL COMMENT '权重',
+    ord_no  int           NOT NULL COMMENT '排序',
+    CONSTRAINT ind_yn UNIQUE (yr, name_en)
+)
+    COMMENT '自然指数（Nature Index）排名-指标';
+
+# 指标数据表
+CREATE TABLE rr_nature_index_wur_ind_rank
+(
+    id        int AUTO_INCREMENT PRIMARY KEY COMMENT 'id',
+    yr        int           NOT NULL COMMENT '年份',
+    ind_id    int           NOT NULL COMMENT '指标id',
+    univ_id   int           NOT NULL COMMENT '院校id(univ.id)',
+    univ_code varchar(20)   NOT NULL COMMENT '院校编码',
+    score     decimal(8, 2) NULL COMMENT '得分',
+    ranking   int           NULL COMMENT '排名',
+    CONSTRAINT ind_rank_uri UNIQUE (univ_code, yr, ind_id)
+)
+    COMMENT '自然指数（Nature Index）排名-单指标排名';
+
+# 排名数据表
+CREATE TABLE rr_nature_index_wur_rank
+(
+    id                   int AUTO_INCREMENT PRIMARY KEY COMMENT 'id',
+    yr                   int           NOT NULL COMMENT '年份',
+    univ_id              int           NOT NULL COMMENT '院校id(univ.id)',
+    univ_code            varchar(20)   NOT NULL COMMENT '院校编码',
+    score                decimal(4, 1) NULL COMMENT '官方得分',
+    ranking              varchar(10)   NOT NULL COMMENT '官方排名',
+    rank_country         varchar(10)   NOT NULL COMMENT '官方地区排名',
+    score_precise        decimal(4, 1) NULL COMMENT '精确得分',
+    ranking_precise      int           NULL COMMENT '精确排名',
+    rank_country_precise int           NULL COMMENT '精确地区排名',
+    CONSTRAINT wur_rank_ur UNIQUE (univ_code, yr)
+)
+    COMMENT '自然指数（Nature Index）排名';
+
+# 自然指数（Nature Index）排名基础数据入库（略）:univ_ranking_raw.raw_nature_index_wur_20220630
+# 更新基础数据表中univ_id
+UPDATE univ_ranking_raw.raw_nature_index_wur_20220630 A
+SET A.univ_id = (SELECT B.id
+                 FROM univ B
+                 WHERE A.univ_code = B.code
+                 ORDER BY B.outdated = 0 DESC, B.outdated DESC
+                 LIMIT 1)
+WHERE 1;
+
+# 检测是否需要更新univ表
+SELECT *
+FROM univ_ranking_raw.raw_nature_index_wur_20220630
+WHERE univ_id IS NULL; -- 需要
+
+INSERT INTO univ (id, code, name_cn, name_en, up, country_id,
+                  outdated, remark)
+SELECT NULL                                                          AS id,
+       univ_code                                                     AS code,
+       univ_name_cn                                                  AS name_cn,
+       univ_name_en                                                  AS name_en,
+       func_calc_univ_up(univ_name_en, univ_name_en)                 AS up,
+       (SELECT C.id FROM gi_country C WHERE C.name_cn = A.region_cn) AS country_id,
+       0                                                             AS outdated,
+       '2022.06.30处理nature_index大学排名时添加'                             AS remark
+FROM univ_ranking_raw.raw_nature_index_wur_20220630 A
+WHERE univ_id IS NULL;
+
+# 排名数据入库：rr_nature_index_wur_rank
+INSERT INTO rr_nature_index_wur_rank (yr, univ_id, univ_code, score, ranking, rank_country, score_precise,
+                                      ranking_precise, rank_country_precise)
+SELECT yr,
+       univ_id,
+       univ_code,
+       NULL                score,
+       rank_world          ranking,
+       rank_region         rank_country,
+       NULL                score_precise,
+       rank_world_precise  ranking_precise,
+       rank_region_precise rank_country_precise
+FROM univ_ranking_raw.raw_nature_index_wur_20220630
+WHERE 1;
+
+# 指标入库：rr_nature_index_wur_indicator
+INSERT INTO rr_nature_index_wur_indicator (yr, name_cn, name_en, ord_no)
+WITH IND AS (SELECT '总论文数' AS name_cn, 'Count' AS name_en, 1 AS ord_no
+             UNION ALL
+             SELECT '论文分数' AS name_cn, 'Share' AS name_en, 2 AS ord_no),
+     YR AS (SELECT yr FROM rr_nature_index_wur_rank GROUP BY yr)
+SELECT B.yr, A.*
+FROM IND A
+         JOIN YR B
+ORDER BY B.yr, A.ord_no;
+
+# 指标数据值入库：rr_nature_index_wur_ind_rank
+INSERT INTO rr_nature_index_wur_ind_rank (yr, ind_id, univ_id, univ_code, score)
+WITH A AS (
+    SELECT yr,
+           univ_id,
+           univ_code,
+           count_yr score,
+           'Count'  ind_name
+    FROM univ_ranking_raw.raw_nature_index_wur_20220630 A
+    UNION ALL
+    SELECT yr,
+           univ_id,
+           univ_code,
+           share_yr score,
+           'Share'  ind_name
+    FROM univ_ranking_raw.raw_nature_index_wur_20220630 A)
+SELECT A.yr,
+       (SELECT B.id FROM rr_nature_index_wur_indicator B WHERE A.yr = B.yr AND A.ind_name = B.name_en) ind_id,
+       A.univ_id,
+       A.univ_code,
+       A.score
+FROM A
+ORDER BY yr, ind_id, univ_code;
+
+
+
+# Scimago世界大学排名
+# 排名表：rr_scimago_wur_rank
+CREATE TABLE rr_scimago_wur_rank
+(
+    id                   int AUTO_INCREMENT PRIMARY KEY COMMENT 'id',
+    yr                   int           NOT NULL COMMENT '年份',
+    univ_id              int           NOT NULL COMMENT '院校id(univ.id)',
+    univ_code            varchar(20)   NOT NULL COMMENT '院校编码',
+    score                decimal(4, 1) NULL COMMENT '官方得分',
+    score_precise        decimal(4, 1) NULL COMMENT '精确得分',
+    ranking              varchar(10)   NOT NULL COMMENT '官方排名',
+    rank_country         varchar(10)   NOT NULL COMMENT '官方地区排名',
+    ranking_precise      int           NULL COMMENT '精确排名',
+    rank_country_precise int           NULL COMMENT '精确地区排名',
+    CONSTRAINT wur_rank_ur UNIQUE (univ_code, yr)
+)
+    COMMENT 'Scimago世界大学排名';
+
+# 排名数据入库
+# 历史年份没有地区排名，需与产品确认：已与产品兰涛确认2009-2021使用国际对标的数据，缺失的数据等排名团队补充后再更新
+# 历史年份数据入库(2009-2022)
+INSERT INTO rr_scimago_wur_rank (yr, univ_id, univ_code, score, score_precise, ranking, rank_country, ranking_precise,
+                                 rank_country_precise)
+SELECT ver_no                        AS yr,
+       (SELECT B.id
+        FROM univ B
+        WHERE A.univ_code = B.code
+        ORDER BY B.outdated = 0 DESC, B.outdated DESC
+        LIMIT 1)                     AS univ_id,
+       univ_code,
+       NULL                             score,
+       NULL                             score_precise,
+       detail ->> '$.indicatorValue' AS ranking,
+       NULL                             rank_country,
+       detail ->> '$.indicatorValue' AS ranking_precise,
+       NULL                             rank_country_precise
+FROM ub_details_0429.intl_var_detail A
+WHERE var_code = '9'
+  AND EXISTS(SELECT * FROM univ C WHERE A.univ_code = C.code)
+ORDER BY ver_no, univ_code;
+
+# 更新2022排名数据的地区排名（只有2022的数据排名团队才给了地区排名）
+UPDATE rr_scimago_wur_rank A
+SET A.ranking_precise      = (SELECT B.ranking_precise
+                              FROM ub_details_raw.scimago_world_univ_ranking_20220630 B
+                              WHERE A.univ_code = B.univ_code
+                                AND A.yr = B.yr),
+    A.rank_country         = (SELECT B.rank_country
+                              FROM ub_details_raw.scimago_world_univ_ranking_20220630 B
+                              WHERE A.univ_code = B.univ_code
+                                AND A.yr = B.yr),
+    A.rank_country_precise = (SELECT B.rank_country_precise
+                              FROM ub_details_raw.scimago_world_univ_ranking_20220630 B
+                              WHERE A.univ_code = B.univ_code
+                                AND A.yr = B.yr)
+WHERE A.yr = 2022;
+
+
+# 国际对标页面后续需更新的两个排名数据
+SELECT *
+FROM ub_details_0429.intl_var_detail
+WHERE var_code = '7'; -- 国际对标-自然指数排名
+
+SELECT *
+FROM ub_details_0429.intl_var_detail
+WHERE var_code = '9'
+GROUP BY ver_no;
+-- 国际对标-Scimago世界大学排名
+
+# 更新国际对比页面自然指数排名
+SELECT *
+FROM ub_details_0429.intl_var_detail
+WHERE var_code = '7';
+
+INSERT INTO ub_details_0429.intl_var_detail (revision, var_id, var_code, source_id, ver_no, univ_code, lev, val, detail,
+                                             rel_code, agg_from, _eversions_, _r_ver_no, created_at, created_by,
+                                             updated_at, updated_by, deleted_at, deleted_by)
+SELECT 0     revision,
+       222   var_id,
+       7     var_code,
+       1     source_id,
+       yr    ver_no,
+       univ_code,
+       0     lev,
+       0     val,
+       JSON_OBJECT(
+               'issue_time', issue_time,
+               'statistica_period', statistica_period,
+               'rank_world', rank_world,
+               'rank_world_precise', rank_world_precise,
+               'rank_region', rank_region,
+               'rank_region_precise', rank_region_precise,
+               'share_previous_yr', share_previous_yr,
+               'share_yr', share_yr,
+               'count_yr', count_yr,
+               'change_in_adjusted_chare', change_in_adjusted_chare,
+               'source_name',source_name
+           ) detail,
+       ''    rel_code,
+       0     agg_from,
+       ''    _eversions_,
+       0     _r_ver_no,
+       NOW() created_at,
+       0     created_by,
+       NOW() updated_at,
+       NULL  updated_by,
+       NULL  deleted_at,
+       NULL  deleted_by
+FROM univ_ranking_raw.raw_nature_index_wur_20220630
+ORDER BY yr, univ_code;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
