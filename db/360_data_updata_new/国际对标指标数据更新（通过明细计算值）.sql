@@ -275,10 +275,70 @@ GROUP BY ver_no, univ_code;
 
 
 
+# CWTS世界大学排名
+# 数据入明细库
+INSERT INTO intl_var_detail (revision, var_id, var_code, source_id, ver_no, univ_code, lev, val, detail, rel_code,
+                             agg_from, _eversions_, _r_ver_no, created_at, created_by, updated_at, updated_by,
+                             deleted_at, deleted_by)
+SELECT 0     revision,
+       7574  var_id,
+       105   var_code,
+       1     source_id,
+       yr    ver_no,
+       univ_code,
+       0     lev,
+       0     val,
+       JSON_OBJECT(
+               'yr', yr,
+               'period', `period`,
+               'univ_code', univ_code,
+               'ranking', ranking,
+               'ranking_precise', ranking_precise,
+               'rank_country', rank_country,
+               'rank_country_precise', rank_country_precise,
+               'impact_p', impact_p,
+               'p_top10', p_top10,
+               'pp_top10', pp_top10
+           ) detail,
+       ''    rel_code,
+       0     agg_from,
+       ''    _eversions_,
+       0     _r_ver_no,
+       NOW() created_at,
+       0     created_by,
+       NOW() updated_at,
+       NULL  updated_by,
+       NULL  deleted_at,
+       NULL  deleted_by
+FROM univ_ranking_raw.raw_cwts_wur_20220707
+WHERE 1;
 
 
-
-
+# 计算CWTS
+INSERT INTO ub_ranking_dev.derived_ind_value_latest (derived_ind_id, ind_code, univ_code, target_ver, effect_ver,
+                                                     eff_src_ids, val_calc_src, val, val_rank_typ, val_rank_all,
+                                                     var_details, ref_detail, alt_id, alt_val, created_at, updated_at,
+                                                     deleted_at)
+SELECT var_id                                                         derived_ind_id,
+       var_code                                                       ind_code,
+       univ_code,
+       ver_no                                                         target_ver,
+       ver_no                                                         effect_ver,
+       source_id                                                      eff_src_ids,
+       0                                                              val_calc_src,
+       val,
+       0                                                              val_rank_typ,
+       0                                                              val_rank_all,
+       JSON_OBJECTAGG(CONCAT(dtl_id, '-', revision), JSON_ARRAY()) AS var_details,
+       JSON_OBJECT('ranking', detail ->> '$.ranking')              AS ref_detail,
+       0                                                              alt_id,
+       NULL                                                           alt_val,
+       NOW()                                                       AS created_at,
+       NOW()                                                       AS updated_at,
+       NULL                                                        AS deleted_at
+FROM intl_var_detail
+WHERE var_code = '105'
+GROUP BY ver_no, univ_code;
 
 
 

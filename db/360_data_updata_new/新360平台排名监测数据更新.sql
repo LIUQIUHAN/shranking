@@ -1250,16 +1250,92 @@ ORDER BY yr, univ_code;
 
 
 
+USE univ_ranking_dev;
+# 原始数据入库：raw_cwts_wur_20220707
+# 更新raw_cwts_wur_20220707.univ_id
+UPDATE univ_ranking_raw.raw_cwts_wur_20220707 A
+SET A.univ_id = (SELECT B.id
+                 FROM univ B
+                 WHERE A.univ_code = B.code
+                 ORDER BY B.outdated = 0 DESC, B.outdated DESC
+                 LIMIT 1)
+WHERE 1;
 
+# 检测是否需要新增高校信息
+SELECT * FROM univ_ranking_raw.raw_cwts_wur_20220707 WHERE univ_id IS NULL; -- 不需要
 
+# 新建CWTS数据表（略）：rr_cwts_ld_ind_rank、rr_cwts_ld_indicator、rr_cwts_ld_rank
+# CWTS指标入库（略）
+# CWTS排名数据入库
+INSERT INTO rr_cwts_rank (yr, univ_id, univ_code, score, ranking, rank_country, score_precise, ranking_precise,
+                             rank_country_precise)
+SELECT yr,
+       univ_id,
+       univ_code,
+       NULL score,
+       ranking,
+       rank_country,
+       NULL score_precise,
+       ranking_precise,
+       rank_country_precise
+FROM univ_ranking_raw.raw_cwts_wur_20220707
+WHERE 1;
 
+# CWTS指标数据值入库
+INSERT INTO rr_cwts_ind_rank (yr, ind_id, univ_id, univ_code, score, ranking)
+SELECT yr,
+       (CASE
+            WHEN yr = 2018 THEN 16
+            WHEN yr = 2019 THEN 19
+            WHEN yr = 2020 THEN 22
+            WHEN yr = 2021 THEN 25
+            WHEN yr = 2022 THEN 28
+           END
+           )    AS ind_id,
+       univ_id,
+       univ_code,
+       impact_p AS score,
+       NULL ranking
+FROM univ_ranking_raw.raw_cwts_wur_20220707
+WHERE 1;
 
+INSERT INTO rr_cwts_ind_rank (yr, ind_id, univ_id, univ_code, score, ranking)
+SELECT yr,
+       (CASE
+            WHEN yr = 2018 THEN 17
+            WHEN yr = 2019 THEN 20
+            WHEN yr = 2020 THEN 23
+            WHEN yr = 2021 THEN 26
+            WHEN yr = 2022 THEN 29
+           END
+           )    AS ind_id,
+       univ_id,
+       univ_code,
+       p_top10 AS score,
+       NULL ranking
+FROM univ_ranking_raw.raw_cwts_wur_20220707
+WHERE 1;
 
+INSERT INTO rr_cwts_ind_rank (yr, ind_id, univ_id, univ_code, score, ranking)
+SELECT yr,
+       (CASE
+            WHEN yr = 2018 THEN 18
+            WHEN yr = 2019 THEN 21
+            WHEN yr = 2020 THEN 24
+            WHEN yr = 2021 THEN 27
+            WHEN yr = 2022 THEN 30
+           END
+           )    AS ind_id,
+       univ_id,
+       univ_code,
+       pp_top10 AS score,
+       NULL ranking
+FROM univ_ranking_raw.raw_cwts_wur_20220707
+WHERE 1;
 
-
-
-
-
+# 页面显示使用字符串
+UPDATE rr_cwts_ind_rank SET score_1 = ROUND(score,0) WHERE ind_id IN (SELECT id FROM rr_cwts_indicator WHERE name_cn RLIKE '数');
+UPDATE rr_cwts_ind_rank SET score_1 = CONCAT(ROUND((score * 100),1),'%') WHERE ind_id IN (SELECT id FROM rr_cwts_indicator WHERE name_cn RLIKE '比例');
 
 
 

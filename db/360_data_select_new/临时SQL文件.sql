@@ -303,14 +303,36 @@ UPDATE ind_score_2020 SET score_rank_typ = 0 WHERE is_same_type = 0;
 
 
 
+USE univ_ranking_raw;
+# 高校状态指标数据库指标查看：自然指数排名
+SELECT id,
+       yr         AS data_year,
+       issue_time AS pub_date,
+       'world'    AS rank_type,
+       'nindex'   AS target_code,
+       (SELECT B._code_old
+        FROM univ_ranking_dev.univ_cn B
+        WHERE A.univ_code = B.code
+        ORDER BY B.outdated = 0 DESC, B.outdated DESC
+        LIMIT 1)  AS institutionCode,
+       rank_world AS urank,
+       NULL       AS institutionName,
+       NULL       AS indicatorName
+FROM `raw_nature_index_wur_20220630` A;
 
 
-
-# 类型N+排名
-
-
-
-
+# 高校状态指标数据库国际对比：自然指数排名
+SELECT id,
+       yr                    AS real_year,
+       yr                    AS data_year,
+       univ_code             AS institutionCode,
+       univ_name_cn          AS institutionName,
+       region_en             AS country,
+       '7'                   AS indicatorCode,
+       rank_world            AS indicatorValue,
+       NULL                  AS data_source_id,
+       '2022-07-07 18:39:01' AS crt_time
+FROM `raw_nature_index_wur_20220630`;
 
 
 

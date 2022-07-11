@@ -2,6 +2,7 @@
 USE ub_ranking_dev;
 
 -- ALTER TABLE indicator AUTO_INCREMENT 0; -- 让自增id连贯
+SET @v_num = 202208;
 INSERT INTO indicator(id, pid, r_ver_no, code, name, abbr, path, level, var_id, ind_lev, is_full_sample, detail_def_id,
                       change_type, definition, editable, shows, tags, ui, detail, val, score, ord_no, remark,
                       created_at, created_by, updated_at, updated_by, deleted_at, deleted_by)
@@ -9,13 +10,13 @@ WITH m AS ( -- 获取实际最大 id，作为本次计算新增记录所用 id �
     SELECT MAX(id) mid
     FROM indicator)
      -- 给 id/pid 字段加上偏移量
-SELECT (m.mid + i.id)                             AS id,
-       IF(i.pid = 0, 0, m.mid + i.pid)            AS pid,
-       202207                                     AS r_ver_no,
-       IF(code = '', 'ub-202207', code)           AS code,
-       IF(name = '最新指标体系-0', '指标体系-202207', name) AS name,
+SELECT (m.mid + i.id)                                       AS id,
+       IF(i.pid = 0, 0, m.mid + i.pid)                      AS pid,
+       @v_num                                               AS r_ver_no,
+       IF(code = '', CONCAT('ub-', @v_num), code)           AS code,
+       IF(name = '最新指标体系-0', CONCAT('指标体系-', @v_num), name) AS name,
        abbr,
-       ''                                         AS path,
+       ''                                                   AS path,
        level,
        var_id,
        ind_lev,
@@ -40,6 +41,28 @@ WITH
 UPDATE indicator i JOIN tree t ON i.id = t.id
 SET i.path = IFNULL(t.new_path, '')
 WHERE i.id > 0;
+
+
+# var_lev_conv
+INSERT INTO var_lev_conv (r_ver_no, var_id, var_code, province_code, conv_val, lev, lev_name, var_name_full, remark,
+                          created_at, updated_at)
+SELECT @v_num AS r_ver_no,
+       var_id,
+       var_code,
+       province_code,
+       conv_val,
+       lev,
+       lev_name,
+       var_name_full,
+       remark,
+       NOW()  AS created_at,
+       NOW()  AS updated_at
+FROM var_lev_conv
+WHERE r_ver_no = (@v_num - 1);
+
+
+
+
 
 
 
