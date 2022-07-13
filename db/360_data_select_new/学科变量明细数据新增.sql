@@ -109,6 +109,58 @@ FROM ub_details_raw.pro_teaching_achievement_award_20220708;
 
 
 
+# 客户反馈论文数据整体替换
+# 删除需要替换的学校论文数据
+DELETE FROM spm_details_0208.var_detail WHERE var_code = 'i47' AND _eversions_ = 202208 AND univ_code IN ('RC00030','RC00026','RC00344','RC00253','RC00157','RC00380');
+
+INSERT INTO spm_details_0208.var_detail (dtl_id, revision, var_id, var_code, source_id, ver_no, univ_code, lev, val,
+                                         detail, subj_code, talent_code, agg_from, _eversions_, created_at, created_by,
+                                         updated_at, updated_by, deleted_at, deleted_by)
+SELECT NULL dtl_id,
+       0 revision,
+       140 var_id,
+       'i47' var_code,
+       46 source_id,
+       yr ver_no,
+       univ_code,
+       1 lev,
+       0 val,
+       JSON_OBJECT(
+                         'is_top' , is_top,
+                         'remark1' , journal_title,
+                         'remark2' , ISSN,
+                         'born_year' , NULL,
+                         'dead_year' , NULL,
+                         'effective' , 1,
+                         'award_level' , NULL,
+                         'talent_name' , authors,
+                         'current_code' , NULL,
+                         'current_name' , NULL,
+                         'elected_code' , univ_code,
+                         'elected_name' , univ_name,
+                         'elected_year' , yr,
+                         'project_name' , paper_title,
+                         'subject_code' , subject_code,
+                         'project_money' , NULL,
+                         'effective_last' , NULL,
+                         'current_code_last' , NULL,
+                         'current_name_last' , NULL,
+                         'subject_code_last' , NULL
+           ) detail,
+       subject_code subj_code,
+       '' talent_code,
+       0 agg_from,
+       202208 _eversions_,
+       NOW() created_at,
+       -2 created_by,
+       NOW() updated_at,
+       NULL updated_by,
+       NULL deleted_at,
+       NULL deleted_by
+FROM `cssci_paper-2022-07-01`
+WHERE univ_code IN ('RC00030','RC00026','RC00344','RC00253','RC00157','RC00380');
+
+
 
 
 

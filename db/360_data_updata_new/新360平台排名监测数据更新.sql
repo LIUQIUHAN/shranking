@@ -1334,8 +1334,12 @@ FROM univ_ranking_raw.raw_cwts_wur_20220707
 WHERE 1;
 
 # 页面显示使用字符串
-UPDATE rr_cwts_ind_rank SET score_1 = ROUND(score,0) WHERE ind_id IN (SELECT id FROM rr_cwts_indicator WHERE name_cn RLIKE '数');
-UPDATE rr_cwts_ind_rank SET score_1 = CONCAT(ROUND((score * 100),1),'%') WHERE ind_id IN (SELECT id FROM rr_cwts_indicator WHERE name_cn RLIKE '比例');
+UPDATE rr_cwts_ind_rank SET score_varchar = ROUND(score_decimal,0) WHERE ind_id IN (SELECT id FROM rr_cwts_indicator WHERE name_cn RLIKE '数');
+UPDATE rr_cwts_ind_rank SET score_varchar = CONCAT(ROUND((score_decimal * 100),1),'%') WHERE ind_id IN (SELECT id FROM rr_cwts_indicator WHERE name_cn RLIKE '比例');
+
+# 页面显示使用两位小数
+UPDATE rr_cwts_ind_rank SET score = ROUND(score_decimal,0) WHERE ind_id IN (SELECT id FROM rr_cwts_indicator WHERE name_cn RLIKE '数');
+UPDATE rr_cwts_ind_rank SET score = ROUND(score_decimal,2) WHERE ind_id IN (SELECT id FROM rr_cwts_indicator WHERE name_cn RLIKE '比例');
 
 
 

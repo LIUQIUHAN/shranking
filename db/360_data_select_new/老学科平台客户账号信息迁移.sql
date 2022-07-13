@@ -22,7 +22,7 @@ SET role_id = 1
 WHERE login_name IN ('cqu0926');
 -- 数据迁移结束后需还原为普通账号
 # 账号信息数据
-SET @EmailNum = 2000;
+SET @EmailNum = 2003;
 INSERT IGNORE INTO user (user_name, login_name, email, mobile, role_id, user_group, univ_code, name, sex, department,
                          position, title, remark, frozen_at, password_md5, password_salt, password_hash, sms_code,
                          sms_code_upd_at, sms_code_tried, wx_union_id, qq_open_id, wb_uid, created_at, created_by,
@@ -270,6 +270,15 @@ SET expire_date = '3022-01-01'
 WHERE EXISTS(SELECT * FROM src_user B WHERE A.remark = B.login_name);
 
 
+# 使用 user_gaojiuserlogin 表的数据更新客户账号密码
+UPDATE user A JOIN user_gaojiuserlogin B ON A.login_name = B.account
+SET A.password_md5 = B.password
+WHERE remark =  'subject_user_old';
+
+
 SELECT *
 FROM user_subs
 WHERE subs_id = -999;
+
+
+

@@ -3,7 +3,8 @@ USE ub_ranking_dev;
 
 -- ALTER TABLE indicator AUTO_INCREMENT 0; -- 让自增id连贯
 SET @v_num = 202208;
-INSERT INTO indicator(id, pid, r_ver_no, code, name, abbr, path, level, var_id, ind_lev, is_full_sample, detail_def_id,
+
+INSERT INTO indicator(id, pid, r_ver_no, code, name, abbr, path, level, var_id, ind_lev, centrality, is_full_sample, detail_def_id,
                       change_type, definition, editable, shows, tags, ui, detail, val, score, ord_no, remark,
                       created_at, created_by, updated_at, updated_by, deleted_at, deleted_by)
 WITH m AS ( -- 获取实际最大 id，作为本次计算新增记录所用 id 的偏移量
@@ -20,12 +21,14 @@ SELECT (m.mid + i.id)                                       AS id,
        level,
        var_id,
        ind_lev,
+       centrality,
        is_full_sample, detail_def_id, change_type, definition, editable, shows,
        tags, ui, detail, val, score, ord_no, remark, created_at, created_by, updated_at, updated_by, deleted_at, deleted_by
 FROM indicator_latest i
          JOIN m
 WHERE name != '大学360';
-
+# 模块十一的省级指标需标记删除
+UPDATE indicator SET deleted_at = NOW() WHERE name RLIKE '省级';
 -- 更新path：
 WITH
     RECURSIVE tree AS (
@@ -41,6 +44,64 @@ WITH
 UPDATE indicator i JOIN tree t ON i.id = t.id
 SET i.path = IFNULL(t.new_path, '')
 WHERE i.id > 0;
+
+# ranking_version（略）
+
+# ranking_instance
+INSERT INTO ranking_instance (ver_no, type_id, name, code, num_listed, ord_no, deleted_at)
+SELECT @v_num AS ver_no,
+       type_id,
+       name,
+       code,
+       num_listed,
+       ord_no,
+       deleted_at
+FROM ranking_instance
+WHERE ver_no = (@v_num - 1);
+
+# weight_scheme
+SET FOREIGN_KEY_CHECKS = 0;
+
+INSERT INTO weight_scheme (r_ver_no, r_type_id, name, created_at, created_by, updated_at, updated_by, deleted_at,
+                           deleted_by)
+SELECT @v_num AS r_ver_no,
+       r_type_id,
+       name,
+       NOW()  AS created_at,
+       created_by,
+       NOW()  AS updated_at,
+       NULL   AS updated_by,
+       NULL   AS deleted_at,
+       NULL   AS deleted_by
+FROM weight_scheme
+WHERE r_ver_no = (@v_num - 1);
+
+SET FOREIGN_KEY_CHECKS = 1;
+
+# 更新ranking_instance.weight_scheme_id
+UPDATE ranking_instance A JOIN weight_scheme B ON A.type_id = B.r_type_id AND A.ver_no = B.r_ver_no
+SET A.weight_scheme_id = B.id
+WHERE A.ver_no = @v_num;
+
+# weight_scheme_detail
+INSERT INTO weight_scheme_detail (scheme_id, ind_id, ind_code, weight)
+WITH SR AS (SELECT A.*,
+                   (SELECT type_id
+                    FROM ranking_instance B
+                    WHERE A.scheme_id = B.weight_scheme_id AND B.ver_no = (@v_num - 1)) t_id
+            FROM weight_scheme_detail A
+            WHERE scheme_id IN (SELECT id FROM weight_scheme WHERE r_ver_no = (@v_num - 1))),
+     RI AS (SELECT SR.*,
+                   (SELECT weight_scheme_id
+                    FROM ranking_instance N
+                    WHERE N.type_id = SR.t_id AND N.ver_no = @v_num) weight_scheme_id
+            FROM SR)
+
+SELECT weight_scheme_id,
+       (SELECT B.id FROM indicator B WHERE RI.ind_code = B.code AND B.level = 3 AND B.r_ver_no = @v_num) AS ind_id,
+       ind_code,
+       weight
+FROM RI;
 
 
 # var_lev_conv
@@ -60,78 +121,36 @@ SELECT @v_num AS r_ver_no,
 FROM var_lev_conv
 WHERE r_ver_no = (@v_num - 1);
 
-
-
-
-
-
-
-# 更新指标表数据年份信息
--- 变量
-UPDATE ub_ranking_dev.indicator_latest
-SET detail = JSON_SET(detail, '$.availVer', '2015-2021', '$.targetVer', '2017-2021')
-WHERE code IN (
-               'posaward',
-               'psaward2',
-               'psaward4',
-               'psaward6',
-               'psaward8',
-               'psaward9',
-               'ptaward'
-    ) AND level = 4;
-
-UPDATE ub_ranking_dev.indicator_latest
-SET detail = JSON_SET(detail, '$.availVer', '2016-2021', '$.targetVer', '2017-2021')
-WHERE code = 'pysaward' AND level = 4;
-
--- 指标
-UPDATE ub_ranking_dev.indicator_latest
-SET detail = JSON_SET(detail, '$.availVer', '2015-2021', '$.targetVer', '2017-2021')
-WHERE code IN (
-               -- 'pacourse', 0-2021
-               'ptaward',
-               'ptadwt',
-               'psaward',
-               'psadwt',
-               'psaward9',
-               'psaward2',
-               'psaward1',
-               'psaward4',
-               'psaward3',
-               'psaward6',
-               'psaward5',
-               'psaward8',
-               'psaward7',
-               'posaward'
-    )
-  AND level = 3;
-
-UPDATE ub_ranking_dev.indicator_latest
-SET detail = JSON_SET(detail, '$.availVer', '2016-2021', '$.targetVer', '2017-2021')
-WHERE code = 'pysaward' AND level = 3;
+# ranking_list
+INSERT INTO ranking_list (r_ver_no, r_leaf_id, univ_cn_id, univ_code, is_same_type)
+SELECT @v_num AS r_ver_no,
+       r_leaf_id,
+       univ_cn_id,
+       univ_code,
+       is_same_type
+FROM ranking_list
+WHERE r_ver_no = (@v_num - 1);
 
 
 -- 更新标签
-UPDATE ub_ranking_dev.indicator_latest SET change_type = 1
-WHERE code IN (
-               'pacourse',
-               'ptaward',
-               'ptadwt',
-               'psaward',
-               'psadwt',
-               'psaward9',
-               'psaward2',
-               'psaward1',
-               'psaward4',
-               'psaward3',
-               'psaward6',
-               'psaward5',
-               'psaward8',
-               'psaward7',
-               'pysaward',
-               'posaward',
-               'pysaward'
-    )
-  AND level = 3;
+UPDATE ub_ranking_dev.indicator SET change_type = 0
+WHERE r_ver_no = @v_num;
 
--- 检测指标信息
+UPDATE ub_ranking_dev.indicator_latest SET change_type = 0
+WHERE 1;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

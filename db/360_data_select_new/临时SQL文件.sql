@@ -335,8 +335,16 @@ SELECT id,
 FROM `raw_nature_index_wur_20220630`;
 
 
-
-
+# 产品需求：学科平台指标表头信息
+SELECT A.def_id,
+       idd.name,
+       idd.remark,
+       A.field_key,
+       A.field_name,
+       A.align,
+       A.ord_no
+FROM ind_detail_field A
+         JOIN ind_detail_def idd ON A.def_id = idd.id;
 
 
 
