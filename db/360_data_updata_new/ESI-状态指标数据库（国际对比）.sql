@@ -30,7 +30,7 @@ r1_5	ESI前1‱学科数（11月）
 
 USE ub_details_raw;
 SELECT id,
-       school_code_word                             AS institutionCode,
+       school_code_world                            AS institutionCode,
        institution_cn                               AS institutionName,
        IF(subject_name_en = 'Total', '5_2', 'r1_2') AS indicatorCode,
        subject_name_en                              AS indicatorSubName,
@@ -45,11 +45,12 @@ SELECT id,
        NULL                                            awardName,
        NULL                                            levelCode,
        NULL                                            subjectCode,
-       CASE WHEN is_one_million = 1 AND subject_name_en != 'Total' THEN 'r1_2_top10000'
-            WHEN is_one_thounds = 1 AND is_one_million = 0 AND subject_name_en != 'Total' THEN 'r1_2_top1000'
-            ELSE NULL END                           AS indicatorCodeSub,
+       CASE
+           WHEN is_one_million = 1 AND subject_name_en != 'Total' THEN 'r1_2_top10000'
+           WHEN is_one_thounds = 1 AND is_one_million = 0 AND subject_name_en != 'Total' THEN 'r1_2_top1000'
+           ELSE NULL END                            AS indicatorCodeSub,
        crt_time
 FROM esi_basics_data
-WHERE school_code_word IS NOT NULL
-  AND school_code_word != ''
-  AND issue_time = ( SELECT MAX(issue_time) FROM esi_count_data );
+WHERE school_code_world IS NOT NULL
+  AND school_code_world != ''
+  AND issue_time = (SELECT MAX(issue_time) FROM esi_count_data);

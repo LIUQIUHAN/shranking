@@ -2,7 +2,7 @@
 
 USE ub_details_raw;
 
-SET @Ver_no = 202205; -- 更改需要更新的ESI发布版本
+SET @Ver_no = 202207; -- 更改需要更新的ESI发布版本
 
 INSERT INTO univ_ranking_dev.rr_esi_subject ( ver_no, name_cn, name_en, num_institution, citation_threshold )
 SELECT ver_no, name_cn, name_en, num_institution, citation_threshold

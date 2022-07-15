@@ -2,7 +2,7 @@
 
 -- 注： 更新 @Date_import 后执行
 USE ub_details_raw;
-SET @Date_import = '2022-07-01';
+SET @Date_import = '2022-07-13';
 
 INSERT INTO ub_details_0429.var_detail ( dtl_id, revision, var_id, var_code, source_id, ver_no, univ_code, lev, val,
                                          agg_from, created_by )
@@ -76,6 +76,7 @@ WITH dtls AS ( SELECT ( SELECT var_id
                    ) )
 
 SELECT B.dtl_id,
+       -- NULL AS dtl_id,
        IFNULL(( SELECT MAX(revision) + 1
                 FROM ub_details_0429.var_detail B
                 WHERE A.var_code = B.var_code
@@ -83,6 +84,7 @@ SELECT B.dtl_id,
                   AND A.ver_no = B.ver_no
                   AND A.univ_code = B.univ_code
                   AND A.agg_from = B.agg_from ), 0) AS revision,
+       -- 0 AS revision,
        A.var_id,
        A.var_code,
        A.source_id,

@@ -1,7 +1,7 @@
 # 老360平台基础数据表入库：rank_tbl_basics_target_data
 
 USE ub_details_raw;
-SET @data_year = '2022年5月';
+SET @data_year = '2022年7月';
 SELECT school_code_ranking AS school_code,
        'c91'               AS target_code,
        @data_year          AS data_year,

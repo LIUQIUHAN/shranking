@@ -2,7 +2,7 @@
 
 -- 根据360平台版本修改：edition_year;
 USE ub_details_raw;
-SELECT '202206'            AS edition_year,
+SELECT '202208'            AS edition_year,
        issue_year,
        issue_time,
        school_code_ranking AS school_code,
