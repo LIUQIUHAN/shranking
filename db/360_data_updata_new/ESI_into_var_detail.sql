@@ -41,21 +41,22 @@ SELECT 0                                                 AS revision,
        univ_code,
        0                                                 AS lev,
        1                                                 AS val,
-       JSON_OBJECT('ranking', ranking,
+       JSON_OBJECT('ranking', CONCAT(ranking),
                    'issue_time', issue_time,
                    'issue_year', issue_year,
                    'school_code', univ_code,
                    'school_name', school_name,
-                   'is_one_million', is_one_million,
-                   'is_one_thounds', is_one_thounds,
+                   'is_one_million', CONCAT(is_one_million),
+                   'is_one_thounds', CONCAT(is_one_thounds),
                    'ESI_subject_name', ESI_subject_name,
                    'enter_subject_no', enter_subject_no) AS detail,
-       0                                                 AS ASrel_code,
-       0                                                 AS ASagg_from,
+       0                                                 AS rel_code,
+       0                                                 AS agg_from,
        edition_year                                      AS _eversions_,
        edition_year                                      AS _r_ver_no,
        -1                                                AS created_by
 FROM var_detail_esi;
+
 
 
 

@@ -14,13 +14,15 @@ BEGIN
     FROM JSON_TABLE(CONCAT('[', TRIM(',' FROM REGEXP_REPLACE(in_string, '\\D+', ',')), ']')
              , '$[*]' COLUMNS (yr int PATH '$')) jt;
     RETURN finNumber;
-END;
-*/
+END;*/
 
-/*UPDATE var_detail
+
+
+UPDATE var_detail
 SET ver_no = ExtractNumber(detail ->> '$.remark1')
 WHERE var_code = 'doct'
-;*/
+AND _eversions_ IN (202206,202207,202208)
+;
 
 
 SELECT REGEXP_REPLACE('长江特聘（2012），科技领军（2017），国家杰青（2011）', '\\d+', ',');
@@ -348,6 +350,22 @@ FROM ind_detail_field A
 
 
 
+
+
+
+
+# 学科变量明细表提取人才姓名
+USE spm_details_0208;
+INSERT INTO var_detail_talen_name (dtl_id, var_code, univ_code, _eversions_, talent_name)
+SELECT dtl_id, var_code, univ_code, _eversions_, detail ->> '$.talent_name' AS talent_name
+FROM var_detail
+WHERE var_code IN (SELECT `code` FROM spm_ranking_dev.dpa_ranking_ind WHERE pid = 13);
+
+
+UPDATE var_detail A JOIN var_detail_talen_name TM ON A.dtl_id = TM.dtl_id AND A._eversions_ = TM._eversions_ AND
+                                                     A.var_code = TM.var_code AND A.univ_code = TM.univ_code
+SET A.talent_name = TM.talent_name
+WHERE A.var_code IN (SELECT `code` FROM spm_ranking_dev.dpa_ranking_ind WHERE pid = 13);
 
 
 

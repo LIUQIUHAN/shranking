@@ -1,6 +1,6 @@
 # 高校状态指标数据库国际对比页面数据：
 
--- 根据数据发布版本月份修改： indicatorCode、indicatorCodeSub：'5_2', 'r1_2','r1_2_top10000' ,'r1_2_top1000'
+-- 根据数据发布版本月份修改： indicatorCode、indicatorCodeSub：'5_3', 'r1_3','r1_3_top10000' ,'r1_3_top1000'
 /*
 r1_0	ESI前1%学科数（1月）
 r1_1	ESI前1%学科数（3月）
@@ -32,7 +32,7 @@ USE ub_details_raw;
 SELECT id,
        school_code_world                            AS institutionCode,
        institution_cn                               AS institutionName,
-       IF(subject_name_en = 'Total', '5_2', 'r1_2') AS indicatorCode,
+       IF(subject_name_en = 'Total', '5_3', 'r1_3') AS indicatorCode,
        subject_name_en                              AS indicatorSubName,
        issue_year                                   AS real_year,
        LEFT(issue_time, 4)                          AS data_year,
@@ -46,8 +46,8 @@ SELECT id,
        NULL                                            levelCode,
        NULL                                            subjectCode,
        CASE
-           WHEN is_one_million = 1 AND subject_name_en != 'Total' THEN 'r1_2_top10000'
-           WHEN is_one_thounds = 1 AND is_one_million = 0 AND subject_name_en != 'Total' THEN 'r1_2_top1000'
+           WHEN is_one_million = 1 AND subject_name_en != 'Total' THEN 'r1_3_top10000'
+           WHEN is_one_thounds = 1 AND is_one_million = 0 AND subject_name_en != 'Total' THEN 'r1_3_top1000'
            ELSE NULL END                            AS indicatorCodeSub,
        crt_time
 FROM esi_basics_data

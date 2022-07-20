@@ -192,7 +192,7 @@ SELECT 0     revision,
                'rankingPrecise', NULL,
                'institutionCode', univ_code,
                'institutionName', NULL,
-               'indicatorCodeSub', IF((`rank`+ 0) > 50, NULL, '35'),
+               'indicatorCodeSub', IF((`rank` + 0) > 50, NULL, '35'),
                'indicatorSubName', subject_name_en,
                'totalInstitution', NULL
            ) detail,
@@ -339,6 +339,319 @@ SELECT var_id                                                         derived_in
 FROM intl_var_detail
 WHERE var_code = '105'
 GROUP BY ver_no, univ_code;
+
+
+# GRAS国际对标明细入库：intl_var_detail
+INSERT INTO intl_var_detail (dtl_id, revision, var_id, var_code, source_id, ver_no, univ_code, lev, val, detail,
+                             rel_code, agg_from, _eversions_, _r_ver_no, created_at, created_by, updated_at,
+                             updated_by, deleted_at, deleted_by)
+SELECT NULL  dtl_id,
+       0     revision,
+       237   var_id,
+       22    var_code,
+       1     source_id,
+       2022  ver_no,
+       univ_code,
+       0     lev,
+       0     val,
+       JSON_OBJECT(
+               'awardee', NULL,
+               'country', country_or_region_en,
+               'awardName', NULL,
+               'data_year', '2022',
+               'isTop1000', NULL,
+               'levelCode', NULL,
+               'indicators', NULL,
+               'isTop10000', NULL,
+               'subjectCode', subject_code,
+               'esiTotalCites', NULL,
+               'indicatorCode', '22',
+               'data_source_id', 1,
+               'indicatorValue', rank_issued,
+               'rankingPrecise', rank_precise,
+               'institutionCode', univ_code,
+               'institutionName', univ_name_en,
+               'indicatorCodeSub', NULL,
+               'indicatorSubName', subject_name_en,
+               'totalInstitution', NULL
+           ) detail,
+       ''    rel_code,
+       0     agg_from,
+       ''    _eversions_,
+       0     _r_ver_no,
+       NOW() created_at,
+       0     created_by,
+       NOW() updated_at,
+       NULL  updated_by,
+       NULL  deleted_at,
+       NULL  deleted_by
+FROM ub_details_raw.raw_gras_sr_details_20220704;
+
+
+# 计算GRAS
+INSERT INTO ub_ranking_dev.derived_ind_value_latest (derived_ind_id, ind_code, univ_code, target_ver, effect_ver,
+                                                     eff_src_ids, val_calc_src, val, val_rank_typ, val_rank_all,
+                                                     var_details, ref_detail, alt_id, alt_val, created_at, updated_at,
+                                                     deleted_at)
+SELECT 236                                                            derived_ind_id,
+       '21'                                                           ind_code,
+       univ_code,
+       ver_no                                                         target_ver,
+       ver_no                                                         effect_ver,
+       source_id                                                      eff_src_ids,
+       0                                                              val_calc_src,
+       COUNT(*)                                                    AS val,
+       0                                                              val_rank_typ,
+       0                                                              val_rank_all,
+       JSON_OBJECTAGG(CONCAT(dtl_id, '-', revision), JSON_ARRAY()) AS var_details,
+       NULL                                                        AS ref_detail,
+       0                                                              alt_id,
+       NULL                                                           alt_val,
+       NOW()                                                       AS created_at,
+       NOW()                                                       AS updated_at,
+       NULL                                                        AS deleted_at
+FROM intl_var_detail
+WHERE var_code = '22'
+  AND (detail ->> '$.rankingPrecise' + 0) <= 50
+  AND ver_no = 2022
+GROUP BY ver_no, univ_code;
+
+INSERT INTO ub_ranking_dev.derived_ind_value_latest (derived_ind_id, ind_code, univ_code, target_ver, effect_ver,
+                                                     eff_src_ids, val_calc_src, val, val_rank_typ, val_rank_all,
+                                                     var_details, ref_detail, alt_id, alt_val, created_at, updated_at,
+                                                     deleted_at)
+SELECT 236                                                            derived_ind_id,
+       '22'                                                           ind_code,
+       univ_code,
+       ver_no                                                         target_ver,
+       ver_no                                                         effect_ver,
+       source_id                                                      eff_src_ids,
+       0                                                              val_calc_src,
+       COUNT(*)                                                    AS val,
+       0                                                              val_rank_typ,
+       0                                                              val_rank_all,
+       JSON_OBJECTAGG(CONCAT(dtl_id, '-', revision), JSON_ARRAY()) AS var_details,
+       NULL                                                        AS ref_detail,
+       0                                                              alt_id,
+       NULL                                                           alt_val,
+       NOW()                                                       AS created_at,
+       NOW()                                                       AS updated_at,
+       NULL                                                        AS deleted_at
+FROM intl_var_detail
+WHERE var_code = '22'
+  AND ver_no = 2022
+GROUP BY ver_no, univ_code;
+
+
+# ESI-202207明细入库
+INSERT INTO intl_var_detail (dtl_id, revision, var_id, var_code, source_id, ver_no, univ_code, lev, val, detail,
+                             rel_code, agg_from, _eversions_, _r_ver_no, created_at, created_by, updated_at, updated_by,
+                             deleted_at, deleted_by)
+SELECT NULL                                    dtl_id,
+       0                                       revision,
+       (CASE WHEN level = '百分之一' THEN 247 WHEN level = '千分之一' THEN 248 WHEN level = '万分之一' THEN 249 END )  var_id,
+       (CASE WHEN level = '百分之一' THEN '32' WHEN level = '千分之一' THEN '33' WHEN level = '万分之一' THEN '34' END ) var_code,
+       1 source_id,
+       202207 ver_no,
+       school_code_world univ_code,
+       0 lev,
+       0 val,
+       JSON_OBJECT('awardee', NULL,
+                   'country', NULL,
+                   'awardName', NULL,
+                   'data_year', '202207',
+                   'isTop1000', IF(level = '千分之一','1',0),
+                   'levelCode', NULL,
+                   'indicators', NULL,
+                   'isTop10000', IF(level = '万分之一','1',0),
+                   'subjectCode', NULL,
+                   'esiTotalCites', CONCAT(cites),
+                   'indicatorCode', (CASE WHEN level = '百分之一' THEN '32' WHEN level = '千分之一' THEN '33' WHEN level = '万分之一' THEN '34' END ),
+                   'data_source_id', 1,
+                   'indicatorValue', CONCAT(ranking),
+                   'rankingPrecise', 'NULL',
+                   'institutionCode', school_code_world,
+                   'institutionName', institution_cn,
+                   'indicatorCodeSub', NULL,
+                   'indicatorSubName', subject_name_en,
+                   'totalInstitution', CONCAT(enter_subject_no)) detail,
+       ''                                      rel_code,
+       0                                       agg_from,
+       ''                                      _eversions_,
+       0                                       _r_ver_no,
+       NOW()                                   created_at,
+       0                                       created_by,
+       NOW()                                   updated_at,
+       NULL                                    updated_by,
+       NULL                                    deleted_at,
+       NULL                                    deleted_by
+FROM ub_details_raw.esi_basics_data
+WHERE issue_year = '2022.07'
+  AND subject_name_en != 'TOTAL'
+  AND school_code_world IS NOT NULL;
+
+INSERT INTO intl_var_detail (dtl_id, revision, var_id, var_code, source_id, ver_no, univ_code, lev, val, detail,
+                             rel_code, agg_from, _eversions_, _r_ver_no, created_at, created_by, updated_at, updated_by,
+                             deleted_at, deleted_by)
+SELECT NULL                                    dtl_id,
+       0                                       revision,
+       250  var_id,
+       '5_0' var_code,
+       1 source_id,
+       202207 ver_no,
+       school_code_world univ_code,
+       0 lev,
+       0 val,
+       JSON_OBJECT('awardee', NULL,
+                   'country', NULL,
+                   'awardName', NULL,
+                   'data_year', '202207',
+                   'isTop1000', IF(level = '千分之一','1',0),
+                   'levelCode', NULL,
+                   'indicators', NULL,
+                   'isTop10000', IF(level = '万分之一','1',0),
+                   'subjectCode', NULL,
+                   'esiTotalCites', CONCAT(cites),
+                   'indicatorCode', '5_0',
+                   'data_source_id', 1,
+                   'indicatorValue', CONCAT(ranking),
+                   'rankingPrecise', 'NULL',
+                   'institutionCode', school_code_world,
+                   'institutionName', institution_cn,
+                   'indicatorCodeSub', NULL,
+                   'indicatorSubName', subject_name_en,
+                   'totalInstitution', CONCAT(enter_subject_no)) detail,
+       ''                                      rel_code,
+       0                                       agg_from,
+       ''                                      _eversions_,
+       0                                       _r_ver_no,
+       NOW()                                   created_at,
+       0                                       created_by,
+       NOW()                                   updated_at,
+       NULL                                    updated_by,
+       NULL                                    deleted_at,
+       NULL                                    deleted_by
+FROM ub_details_raw.esi_basics_data
+WHERE issue_year = '2022.07'
+  AND subject_name_en = 'TOTAL'
+  AND school_code_world IS NOT NULL;
+
+
+# 计算ESI-202207
+INSERT INTO ub_ranking_dev.derived_ind_value_latest (derived_ind_id, ind_code, univ_code, target_ver, effect_ver,
+                                                     eff_src_ids, val_calc_src, val, val_rank_typ, val_rank_all,
+                                                     var_details, ref_detail, alt_id, alt_val, created_at, updated_at,
+                                                     deleted_at)
+SELECT 247                                                            derived_ind_id,
+       '32'                                                           ind_code,
+       univ_code,
+       ver_no                                                         target_ver,
+       ver_no                                                         effect_ver,
+       source_id                                                      eff_src_ids,
+       0                                                              val_calc_src,
+       COUNT(*)                                                    AS val,
+       0                                                              val_rank_typ,
+       0                                                              val_rank_all,
+       JSON_OBJECTAGG(CONCAT(dtl_id, '-', revision), JSON_ARRAY()) AS var_details,
+       NULL                                                        AS ref_detail,
+       0                                                              alt_id,
+       NULL                                                           alt_val,
+       NOW()                                                       AS created_at,
+       NOW()                                                       AS updated_at,
+       NULL                                                        AS deleted_at
+FROM intl_var_detail
+WHERE var_code IN ( '32','33','34' )
+  AND ver_no = 202207
+GROUP BY univ_code;
+
+INSERT INTO ub_ranking_dev.derived_ind_value_latest (derived_ind_id, ind_code, univ_code, target_ver, effect_ver,
+                                                     eff_src_ids, val_calc_src, val, val_rank_typ, val_rank_all,
+                                                     var_details, ref_detail, alt_id, alt_val, created_at, updated_at,
+                                                     deleted_at)
+SELECT 248                                                            derived_ind_id,
+       '33'                                                           ind_code,
+       univ_code,
+       ver_no                                                         target_ver,
+       ver_no                                                         effect_ver,
+       source_id                                                      eff_src_ids,
+       0                                                              val_calc_src,
+       COUNT(*)                                                    AS val,
+       0                                                              val_rank_typ,
+       0                                                              val_rank_all,
+       JSON_OBJECTAGG(CONCAT(dtl_id, '-', revision), JSON_ARRAY()) AS var_details,
+       NULL                                                        AS ref_detail,
+       0                                                              alt_id,
+       NULL                                                           alt_val,
+       NOW()                                                       AS created_at,
+       NOW()                                                       AS updated_at,
+       NULL                                                        AS deleted_at
+FROM intl_var_detail
+WHERE var_code IN ( '33','34' )
+  AND ver_no = 202207
+GROUP BY univ_code;
+
+INSERT INTO ub_ranking_dev.derived_ind_value_latest (derived_ind_id, ind_code, univ_code, target_ver, effect_ver,
+                                                     eff_src_ids, val_calc_src, val, val_rank_typ, val_rank_all,
+                                                     var_details, ref_detail, alt_id, alt_val, created_at, updated_at,
+                                                     deleted_at)
+SELECT 249                                                            derived_ind_id,
+       '34'                                                           ind_code,
+       univ_code,
+       ver_no                                                         target_ver,
+       ver_no                                                         effect_ver,
+       source_id                                                      eff_src_ids,
+       0                                                              val_calc_src,
+       COUNT(*)                                                    AS val,
+       0                                                              val_rank_typ,
+       0                                                              val_rank_all,
+       JSON_OBJECTAGG(CONCAT(dtl_id, '-', revision), JSON_ARRAY()) AS var_details,
+       NULL                                                        AS ref_detail,
+       0                                                              alt_id,
+       NULL                                                           alt_val,
+       NOW()                                                       AS created_at,
+       NOW()                                                       AS updated_at,
+       NULL                                                        AS deleted_at
+FROM intl_var_detail
+WHERE var_code ='34'
+  AND ver_no = 202207
+GROUP BY univ_code;
+
+INSERT INTO ub_ranking_dev.derived_ind_value_latest (derived_ind_id, ind_code, univ_code, target_ver, effect_ver,
+                                                     eff_src_ids, val_calc_src, val, val_rank_typ, val_rank_all,
+                                                     var_details, ref_detail, alt_id, alt_val, created_at, updated_at,
+                                                     deleted_at)
+SELECT 250                                                            derived_ind_id,
+       '5_0'                                                           ind_code,
+       univ_code,
+       ver_no                                                         target_ver,
+       ver_no                                                         effect_ver,
+       source_id                                                      eff_src_ids,
+       0                                                              val_calc_src,
+       0                                                           AS val,
+       0                                                              val_rank_typ,
+       0                                                              val_rank_all,
+       JSON_OBJECTAGG(CONCAT(dtl_id, '-', revision), JSON_ARRAY()) AS var_details,
+       JSON_OBJECT('ranking', detail ->> '$.indicatorValue')       AS ref_detail,
+       0                                                              alt_id,
+       NULL                                                           alt_val,
+       NOW()                                                       AS created_at,
+       NOW()                                                       AS updated_at,
+       NULL                                                        AS deleted_at
+FROM intl_var_detail
+WHERE var_code ='5_0'
+  AND ver_no = 202207
+GROUP BY univ_code;
+
+
+
+
+
+
+
+
+
+
+
 
 
 

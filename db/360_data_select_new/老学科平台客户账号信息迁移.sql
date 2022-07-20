@@ -3,6 +3,35 @@
 # 老平台涉及到的表有：gaojilogin_user、t_school_benchmark、t_school_subjects、t_subjects_subrank、user_subrank、institution_subrank、user_gaojiuserlogin
 USE src_product;
 
+# 数据迁移前的准备工作：标记无效数据
+UPDATE t_school_benchmark
+SET status = 0
+WHERE school_id = 'sc00452'
+  AND member_name = 'RSC';
+UPDATE t_school_benchmark
+SET status = 0
+WHERE school_id = 'sc00452'
+  AND member_name = 'JWC';
+
+UPDATE t_school_subjects
+SET status = 0
+WHERE school_id = 'sc00452'
+  AND member_name = 'RSC';
+UPDATE t_school_subjects
+SET status = 0
+WHERE school_id = 'sc00452'
+  AND member_name = 'JWC';
+
+UPDATE t_school_subjects
+SET status = 0
+WHERE school_id = 'sc00106'
+  AND member_name = 'mks001';
+UPDATE t_school_subjects
+SET status = 0
+WHERE school_id = 'sc00106'
+  AND member_name = 'mks001';
+
+
 # 更新institution_subrank.tcode
 UPDATE institution_subrank A
 SET A.tcode = (SELECT code
@@ -100,7 +129,8 @@ WHERE d.created_by = -8888
 
 DELETE
 FROM subscription
-WHERE updated_by = -2 AND product_code = 'spm';
+WHERE updated_by = -2
+  AND product_code = 'spm';
 # 学科标杆学校
 INSERT INTO subscription (product_code, remark, univ_code, perm, start_date, expire_date, managed_by, created_at,
                           created_by, updated_at, updated_by)
@@ -115,6 +145,7 @@ WITH benchmark AS (
            A.update_time,
            A.create_id
     FROM t_school_benchmark A
+    WHERE status = 1
     UNION ALL
     SELECT B.id,
            (SELECT D.tcode FROM institution_subrank D WHERE B.school_id = D.subjectCode)       univ_code,
@@ -128,7 +159,8 @@ WITH benchmark AS (
     WHERE NOT EXISTS(SELECT *
                      FROM t_school_benchmark Z
                      WHERE B.member_name = Z.member_name
-                       AND B.subject_id = Z.subject_id))
+                       AND B.subject_id = Z.subject_id)
+      AND status = 1)
    , M AS (SELECT name, univ_code, subject_code, create_id, JSON_ARRAYAGG(benchmark_univ_code) benchmark_univ_codes
            FROM benchmark
            GROUP BY name, univ_code, subject_code
@@ -273,7 +305,7 @@ WHERE EXISTS(SELECT * FROM src_user B WHERE A.remark = B.login_name);
 # 使用 user_gaojiuserlogin 表的数据更新客户账号密码
 UPDATE user A JOIN user_gaojiuserlogin B ON A.login_name = B.account
 SET A.password_md5 = B.password
-WHERE remark =  'subject_user_old';
+WHERE remark = 'subject_user_old';
 
 
 SELECT *

@@ -12,8 +12,8 @@ SELECT (@rowNum := @rowNum + 1)                           id,
        enter_subject_no,
        LEFT(issue_year, 4)                             AS data_year,
        NULL                                               remark1,
-       NULL                                               crt_time,
-       NULL                                               crt_user,
+       NOW()                                           AS crt_time,
+       'system'                                        AS crt_user,
        IF(is_one_thounds = 1, RIGHT(issue_year, 2), 0) AS is_one_thounds,
        IF(is_one_million = 1, RIGHT(issue_year, 2), 0) AS is_one_million,
        RIGHT(issue_year, 2)                            AS data_month
@@ -21,4 +21,4 @@ FROM `esi_basics_data`
 WHERE school_code_ranking IS NOT NULL
   AND school_code_ranking != ''
   AND subject_name_cn != '整体'
-  AND issue_time = ( SELECT MAX(issue_time) FROM esi_count_data );
+  AND issue_time = (SELECT MAX(issue_time) FROM esi_count_data);
