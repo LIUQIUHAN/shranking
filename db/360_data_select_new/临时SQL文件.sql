@@ -356,20 +356,200 @@ FROM ind_detail_field A
 
 # 学科变量明细表提取人才姓名
 USE spm_details_0208;
-INSERT INTO var_detail_talen_name (dtl_id, var_code, univ_code, _eversions_, talent_name)
+INSERT INTO _b2_talen_name (dtl_id, var_code, univ_code, _eversions_, talent_name)
 SELECT dtl_id, var_code, univ_code, _eversions_, detail ->> '$.talent_name' AS talent_name
 FROM var_detail
-WHERE var_code IN (SELECT `code` FROM spm_ranking_dev.dpa_ranking_ind WHERE pid = 13);
+WHERE var_code IN (SELECT `code` FROM spm_ranking_dev.dpa_ranking_ind WHERE pid = 13)
+AND _eversions_ = '202208';
 
-
-UPDATE var_detail A JOIN var_detail_talen_name TM ON A.dtl_id = TM.dtl_id AND A._eversions_ = TM._eversions_ AND
+UPDATE var_detail A JOIN _b2_talen_name TM ON A.dtl_id = TM.dtl_id AND A._eversions_ = TM._eversions_ AND
                                                      A.var_code = TM.var_code AND A.univ_code = TM.univ_code
 SET A.talent_name = TM.talent_name
-WHERE A.var_code IN (SELECT `code` FROM spm_ranking_dev.dpa_ranking_ind WHERE pid = 13);
+WHERE A.var_code IN (SELECT `code` FROM spm_ranking_dev.dpa_ranking_ind WHERE pid = 13)
+AND A._eversions_ = '202208';
 
 
+# 项目类变量无获批金额的数据，根据产品给的规则批量插入金额
+UPDATE var_detail SET val = 20, detail = json_set(detail,'$.project_money',20) WHERE var_code = 'add1'    AND val = 0 AND _eversions_ = '202208';
+UPDATE var_detail SET val = 15, detail = json_set(detail,'$.project_money',15) WHERE var_code = 'add1056' AND val = 0 AND _eversions_ = '202208';
+UPDATE var_detail SET val = 40, detail = json_set(detail,'$.project_money',40) WHERE var_code = 'add27'   AND val = 0 AND _eversions_ = '202208';
+UPDATE var_detail SET val = 70, detail = json_set(detail,'$.project_money',70) WHERE var_code = 'add7'    AND val = 0 AND _eversions_ = '202208';
+UPDATE var_detail SET val = 20, detail = json_set(detail,'$.project_money',20) WHERE var_code = 'west1'   AND val = 0 AND _eversions_ = '202208';
+UPDATE var_detail SET val =  3, detail = json_set(detail,'$.project_money', 3) WHERE var_code = 'west2'   AND val = 0 AND _eversions_ = '202208';
+UPDATE var_detail SET val =  5, detail = json_set(detail,'$.project_money', 5) WHERE var_code = 'x41'     AND val = 0 AND _eversions_ = '202208';
+UPDATE var_detail SET val = 30, detail = json_set(detail,'$.project_money',30) WHERE var_code = 'add1111' AND val = 0 AND _eversions_ = '202208';
+UPDATE var_detail SET val =  7, detail = json_set(detail,'$.project_money', 7) WHERE var_code = 'c115'    AND val = 0 AND _eversions_ = '202208';
 
 
+UPDATE var_detail
+SET val    = IF(detail ->> '$.award_level' = '重大项目',20,10),
+    detail = JSON_SET(detail, '$.project_money', IF(detail ->> '$.award_level' = '重大项目',20,10))
+WHERE var_code = 'o11'
+  AND val = 0
+  AND _eversions_ = '202208';
+
+
+UPDATE var_detail
+SET val    = IF(subj_code IN (
+                              '0701',
+                              '0702',
+                              '0703',
+                              '0704',
+                              '0705',
+                              '0706',
+                              '0707',
+                              '0708',
+                              '0709',
+                              '0710',
+                              '0711',
+                              '0712',
+                              '0713',
+                              '0714',
+                              '0801',
+                              '0802',
+                              '0803',
+                              '0804',
+                              '0805',
+                              '0806',
+                              '0807',
+                              '0808',
+                              '0809',
+                              '0810',
+                              '0811',
+                              '0812',
+                              '0813',
+                              '0814',
+                              '0815',
+                              '0816',
+                              '0817',
+                              '0818',
+                              '0819',
+                              '0820',
+                              '0821',
+                              '0822',
+                              '0823',
+                              '0824',
+                              '0825',
+                              '0826',
+                              '0827',
+                              '0828',
+                              '0829',
+                              '0830',
+                              '0831',
+                              '0832',
+                              '0833',
+                              '0834',
+                              '0835',
+                              '0836',
+                              '0837',
+                              '0838',
+                              '0839',
+                              '0901',
+                              '0902',
+                              '0903',
+                              '0904',
+                              '0905',
+                              '0906',
+                              '0907',
+                              '0908',
+                              '0909',
+                              '1001',
+                              '1002',
+                              '1003',
+                              '1004',
+                              '1005',
+                              '1006',
+                              '1007',
+                              '1008',
+                              '1009',
+                              '1010',
+                              '1011'
+    ), 18, 15),
+    detail = JSON_SET(detail, '$.project_money', IF(subj_code IN (
+                                                                  '0701',
+                                                                  '0702',
+                                                                  '0703',
+                                                                  '0704',
+                                                                  '0705',
+                                                                  '0706',
+                                                                  '0707',
+                                                                  '0708',
+                                                                  '0709',
+                                                                  '0710',
+                                                                  '0711',
+                                                                  '0712',
+                                                                  '0713',
+                                                                  '0714',
+                                                                  '0801',
+                                                                  '0802',
+                                                                  '0803',
+                                                                  '0804',
+                                                                  '0805',
+                                                                  '0806',
+                                                                  '0807',
+                                                                  '0808',
+                                                                  '0809',
+                                                                  '0810',
+                                                                  '0811',
+                                                                  '0812',
+                                                                  '0813',
+                                                                  '0814',
+                                                                  '0815',
+                                                                  '0816',
+                                                                  '0817',
+                                                                  '0818',
+                                                                  '0819',
+                                                                  '0820',
+                                                                  '0821',
+                                                                  '0822',
+                                                                  '0823',
+                                                                  '0824',
+                                                                  '0825',
+                                                                  '0826',
+                                                                  '0827',
+                                                                  '0828',
+                                                                  '0829',
+                                                                  '0830',
+                                                                  '0831',
+                                                                  '0832',
+                                                                  '0833',
+                                                                  '0834',
+                                                                  '0835',
+                                                                  '0836',
+                                                                  '0837',
+                                                                  '0838',
+                                                                  '0839',
+                                                                  '0901',
+                                                                  '0902',
+                                                                  '0903',
+                                                                  '0904',
+                                                                  '0905',
+                                                                  '0906',
+                                                                  '0907',
+                                                                  '0908',
+                                                                  '0909',
+                                                                  '1001',
+                                                                  '1002',
+                                                                  '1003',
+                                                                  '1004',
+                                                                  '1005',
+                                                                  '1006',
+                                                                  '1007',
+                                                                  '1008',
+                                                                  '1009',
+                                                                  '1010',
+                                                                  '1011'
+        ), 18, 15))
+WHERE var_code = 'b43'
+  AND val IN (10,6.5)
+  AND _eversions_ = '202208';
+
+
+# 更新周佳提出的 detail ->> '$.elected_year' 年份问题
+UPDATE var_detail
+SET detail = JSON_SET(detail, '$.elected_year', LEFT(detail ->> '$.elected_year', 4))
+WHERE detail ->> '$.elected_year' IN ('2014.0', '2015.0', '2016.0', '2017.0', '2018.0', '2019.0', '2020.0','2021.0')
+AND _eversions_ = '202208';
 
 
 
